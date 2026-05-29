@@ -4,6 +4,7 @@ import helmet from "helmet";
 
 import { router as apiRouter } from "./roues/index.js";
 import cookieParser from "cookie-parser";
+import { connectDB } from "./config/mongoDB.js";
 
 const corsOption = {
   origin: [
@@ -37,6 +38,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", apiRouter);
+
+await connectDB()
 
 app.listen(PORT, () => {
   console.log(`Server is running or Port: ${PORT} !!`);
