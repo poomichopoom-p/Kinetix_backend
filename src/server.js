@@ -1,5 +1,5 @@
 import express from "express";
-import { cors } from "cors";
+import cors from "cors";
 import helmet from "helmet";
 
 import { router as apiRouter } from "./roues/index.js";
@@ -18,20 +18,8 @@ const PORT = process.env.PORT || 5000;
 
 app.use(helmet());
 app.use(cookieParser());
-app.use(cors());
+app.use(cors(corsOption));
 app.use(express.json());
-
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || "Server is error!",
-    path: req.originalUrl,
-    method: req.method,
-    timestamp: new Data().toISOString(),
-    stack: err.stack,
-  });
-});
 
 app.get("/", (req, res) => {
   res.send("Welcome to Kinetix");
@@ -39,7 +27,24 @@ app.get("/", (req, res) => {
 
 app.use("/api", apiRouter);
 
-await connectDB()
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  const response = {
+    success: false,
+    message: err.message || "Server is error!",
+    path: req.originalUrl,
+    method: req.method,
+    timestamp: new Date().toISOString(),
+  };
+
+  if (process.env.NODE_ENV !== "production") {
+    response.stack = err.stack;
+  }
+
+  res.status(err.status || 500).json(response);
+});
+
+await connectDB();
 
 app.listen(PORT, () => {
   console.log(`Server is running or Port: ${PORT} !!`);

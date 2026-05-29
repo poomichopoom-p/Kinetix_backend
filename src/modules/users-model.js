@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
+
 const userSchema = new mongoose.Schema({
   name: { type: String, trim: true, minlength: 3, maxlength: 30 },
   surname: { type: String, trim: true, minlength: 3, maxlength: 30 },
@@ -8,7 +9,7 @@ const userSchema = new mongoose.Schema({
   address: { type: String, minlength: 10, select: true },
 });
 
-userSchema.pre("save", async () => {
+userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 12);
 });
