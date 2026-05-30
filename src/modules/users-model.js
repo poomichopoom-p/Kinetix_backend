@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 const userSchema = new mongoose.Schema({
   name: { type: String, trim: true, minlength: 3, maxlength: 30 },
   surname: { type: String, trim: true, minlength: 3, maxlength: 30 },
-  email: { type: String, trim: true, unique: true },
+  email: { type: String, trim: true, unique: true, match:/^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
   password: { type: String, trim: true, minlength: 8, select: false },
   address: { type: String, minlength: 10, select: true },
 });
@@ -14,3 +14,7 @@ userSchema.pre("save", async () => {
 });
 
 export const User = mongoose.model("User", userSchema);
+
+
+
+
