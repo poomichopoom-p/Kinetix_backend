@@ -1,4 +1,4 @@
-import User from "../../modules/users-model";
+import {User} from "../../modules/users-model.js";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
