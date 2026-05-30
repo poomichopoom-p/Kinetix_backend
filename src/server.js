@@ -1,5 +1,5 @@
 import express from "express";
-import { cors } from "cors";
+import  cors  from "cors";
 import helmet from "helmet";
 
 import { router as apiRouter } from "./roues/index.js";
@@ -36,7 +36,7 @@ app.use((err, req, res, next) => {
 app.get("/", (req, res) => {
   res.send("Welcome to Kinetix");
 });
-
+// http//localhost:5000/api
 app.use("/api", apiRouter);
 
 await connectDB()
