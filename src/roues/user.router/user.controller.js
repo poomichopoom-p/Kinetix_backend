@@ -1,4 +1,6 @@
-import {User} from "../../modules/users-model.js";
+import  jwt  from "jsonwebtoken";
+import { User } from "../../modules/Model/users-model.js";
+import bcrypt from "bcrypt";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -40,7 +42,60 @@ export const registerUser = async (req, res, next) => {
       .status(201)
       .json({ success: true, message: "successful created!", data: safe });
   } catch (err) {
+    const error = new Error("user");
+    err.status = 404;
+    err.message = "created fail !";
     // res.status(400).json({success:false,message:"error!",error:err})
+    return next(error);
+  }
+};
+
+export const login = async (req, res, next) => {
+  const { email, password } = req.body || "";
+
+  if (!email || !password) {
+    return res
+      .status(400)
+      .json({ success: false, message: "email or password not correct !" });
+  }
+  try {
+    const user = await mongoose.findOne({ email }).select("+password");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "user not found!" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ success: false, message: " worng password!! " });
+    }
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRETKEY, {
+      expiresIn: "2h",
+    });
+    const isprod = process.env.NODE_ENV === "production";
+
+    res.cookie("accessToken", token, {
+      httpOnly: true,
+      secure: isprod ? "none" : "lax",
+      path: "/",
+      maxAge: 120 * 120 * 2000,
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Login success!",
+      user: {
+        _id: user._id,
+        email: user.email,
+        password: user.password,
+        name: user.name,
+        userRank: user.userRank,
+      },
+    });
+  } catch (err) {
     next(err);
   }
 };

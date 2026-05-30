@@ -1,10 +1,11 @@
 import express from "express";
-import  cors  from "cors";
+import cors from "cors";
 import helmet from "helmet";
 
 import { router as apiRouter } from "./roues/index.js";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./config/mongoDB.js";
+import { limiter } from "./middelware/rateLimit.js";
 
 const corsOption = {
   origin: [
@@ -20,6 +21,7 @@ app.use(helmet());
 app.use(cookieParser());
 app.use(cors());
 app.use(express.json());
+app.use(limiter);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -39,7 +41,7 @@ app.get("/", (req, res) => {
 // http//localhost:5000/api
 app.use("/api", apiRouter);
 
-await connectDB()
+await connectDB();
 
 app.listen(PORT, () => {
   console.log(`Server is running or Port: ${PORT} !!`);
