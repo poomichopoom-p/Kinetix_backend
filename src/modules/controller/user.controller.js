@@ -1,5 +1,5 @@
 import  jwt  from "jsonwebtoken";
-import { User } from "../../modules/Model/users-model.js";
+import { User } from "../Model/users-model.js";
 import bcrypt from "bcrypt";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
