@@ -14,12 +14,15 @@ const corsOption = {
     "http://localhost:5175",
   ],
 };
+
+// TODO: remove before production
+// const corsOption = { origin: "*" };
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(helmet());
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({ origin: "*", credentials: false })); // TODO: revert to cors(corsOption) before production
 app.use(express.json());
 app.use(limiter);
 
@@ -30,7 +33,7 @@ app.use((err, req, res, next) => {
     message: err.message || "Server is error!",
     path: req.originalUrl,
     method: req.method,
-    timestamp: new Data().toISOString(),
+    timestamp: new Date().toISOString(),
     stack: err.stack,
   });
 });

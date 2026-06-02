@@ -59,7 +59,7 @@ export const login = async (req, res, next) => {
       .json({ success: false, message: "email or password not correct !" });
   }
   try {
-    const user = await mongoose.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res
         .status(404)
@@ -80,7 +80,7 @@ export const login = async (req, res, next) => {
 
     res.cookie("accessToken", token, {
       httpOnly: true,
-      secure: isprod ? "none" : "lax",
+      secure: isprod,
       path: "/",
       maxAge: 120 * 120 * 2000,
     });
@@ -90,7 +90,6 @@ export const login = async (req, res, next) => {
       user: {
         _id: user._id,
         email: user.email,
-        password: user.password,
         name: user.name,
         userRank: user.userRank,
       },
