@@ -37,7 +37,7 @@ const variantSchema = new mongoose.Schema({
   images: { type: String },
   size: [sizeSchema],
 });
-const priceSchema = new mongoose.Schema({
+export const priceSchema = new mongoose.Schema({
   "1day": { type: Number, require: true },
   "3day": { type: Number, require: true },
   "7day": { type: Number, require: true },
@@ -51,15 +51,20 @@ const ProductsSchema = new mongoose.Schema(
       ref: "Brand",
       required: true,
     },
-    category: {
+    gender: {
       type: String,
       required: true,
       enum: ["men", "women", "unisex"],
     },
+    category: {
+      type: String,
+      required: true,
+      enum: ["Road", "Trail", "Daily trainer"],
+    },
     price: [priceSchema],
     variants: [variantSchema],
     isActive: { type: Boolean, default: true },
-    createdAt: { type: Date, default: Date.now },
+    createdAt: { type: Date, default: Date.now ,select:false},
   },
   { timestamps: true },
 );

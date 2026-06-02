@@ -16,3 +16,7 @@ export const getOrder = async (req, res, next) => {
     next(err);
   }
 };
+
+export const newOrder = async (req,res,next) => {
+    const {costomerId, status, rental_plan, } = req.body || "" ;
+}
