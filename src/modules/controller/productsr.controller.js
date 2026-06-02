@@ -1,4 +1,4 @@
-import { Products } from "../Model/products-model";
+import { Products } from "../Model/products-model.js";
 
 export const getProduct = async (req, res, next) => {
   try {
@@ -19,5 +19,3 @@ export const getProduct = async (req, res, next) => {
     next(err);
   }
 };
-
-
