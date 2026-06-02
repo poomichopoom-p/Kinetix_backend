@@ -54,11 +54,15 @@ export const createProduct = async (req, res, next) => {
 };
 
 export const createNewBrand = async (req, res, next) => {
-  const { brandName,model } = req.body || "";
- if(!brandName){
+  const { brandName,model } = req.body || {};
+  const brand = String(brandName || "").trim();
+  const m = String(model || "");
+  console.log(brandName,model);
+ if(!brand){
   return res.status(404).json({
     success: false,
-    message:"Brand name is reqired!"
+    message:"Brand name is reqired!",
+    
   });
   try{
     const doc = await Brand.create(brandName)
