@@ -1,15 +1,13 @@
 import { Router } from "express";
 import authUser from "../../middelware/authUser.js";
-
+import { login, registerUser } from "./user.controller.js";
 
 export const router = Router();
 
-router.get("/:id", );
+// router.get("/:id", );
 
+router.post("/register", registerUser);
+router.post("/login", authUser, login);
 
-router.post("/register", );
-router.post("/login",authUser, );
-
-
-router.patch("/:id",);
-router.delete("/:id",)
+// router.patch("/:id",);
+// router.delete("/:id",)
