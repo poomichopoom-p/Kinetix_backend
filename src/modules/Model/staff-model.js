@@ -25,4 +25,4 @@ const staffSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-export const staff = mongoose.model("staff", staffSchema);
+export const Staff = mongoose.model("staff", staffSchema);

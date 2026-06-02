@@ -1,10 +1,16 @@
 import { Router } from "express";
 import authUser from "../../middelware/authUser.js";
-import { getProduct } from "../../modules/controller/productsr.controller.js";
+import authStaff from "../../middelware/authStaff.js";
+import {
+  createProduct,
+  getProduct,
+} from "../../modules/controller/products.controller.js"
 
 export const router = Router();
 // http//localhost:5000/api/products/
 router.get("/", getProduct);
+router.post("/createProduct", createProduct);
+// router.post("/new Brand",)
 
 // router.post("/bill", authUser, async (req, res, next) => {
 //   const { modleName, skuColorCode, size, price } = req.body || "";

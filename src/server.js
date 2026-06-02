@@ -9,6 +9,7 @@ import { limiter } from "./middelware/rateLimit.js";
 
 const corsOption = {
   origin: [
+    "https://kinetix-qnx5.onrender.com",
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:5175",
@@ -30,7 +31,7 @@ app.use((err, req, res, next) => {
     message: err.message || "Server is error!",
     path: req.originalUrl,
     method: req.method,
-    timestamp: new Data().toISOString(),
+    timestamp: new Date().toISOString(),
     stack: err.stack,
   });
 });
