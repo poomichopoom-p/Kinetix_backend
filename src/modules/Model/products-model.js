@@ -1,22 +1,5 @@
 import mongoose from "mongoose";
 
-// const productsSchema = new mongoose.Schema({
-//   name: { type: String, trim: true, maxlength: 30, minlength: 5 },
-//   model: { type: String, minlength: 3, maxlength: 20 },
-//   SKU: { type: String, Unique: true, trim: true, uppercase: true },
-//   price: { type: Number, trim: true },
-//   brand: { type: String, minlength: 4 },
-//   size: { type: Number, trim: true },
-//   color: { type: String, minlength: 3, maxlength: 26, trim: true },
-//   category: {
-//     trpe: String,
-//     minlength: 3,
-//     maxlength: 15,
-//     trim: true,
-//     enum: ["men", "women", "unisex"],
-//   },
-// });
-
 const sizeSchema = new mongoose.Schema(
   {
     size: { type: Number, required: true },
