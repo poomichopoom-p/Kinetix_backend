@@ -5,6 +5,7 @@ import helmet from "helmet";
 import { router as apiRouter } from "./roues/index.js";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./config/mongoDB.js";
+import { limiter } from "./middelware/rateLimit.js";
 
 const corsOption = {
   origin: [
@@ -20,11 +21,12 @@ app.use(helmet());
 app.use(cookieParser());
 app.use(cors(corsOption));
 app.use(express.json());
+app.use(limiter);
 
 app.get("/", (req, res) => {
   res.send("Welcome to Kinetix");
 });
-
+// http//localhost:5000/api
 app.use("/api", apiRouter);
 
 app.use((err, req, res, next) => {
