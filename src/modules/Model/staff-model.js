@@ -25,4 +25,7 @@ const staffSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+
 export const Staff = mongoose.model("Staff", staffSchema);
+
