@@ -21,8 +21,11 @@ const staffSchema = new mongoose.Schema(
       match: /^a/,
     },
     address: { type: String, minlength: 6, maxlength: 50 },
-    role: { trpe: String, enum: ["staff", "admin"] },
+    role: { type: String, enum: ["staff", "admin"]},
   },
   { timestamps: true },
 );
+
+
 export const Staff = mongoose.model("Staff", staffSchema);
+
