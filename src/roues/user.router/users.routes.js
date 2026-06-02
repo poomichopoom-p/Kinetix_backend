@@ -10,7 +10,8 @@ export const router = Router();
 // router.get("/:id", );
 
 router.post("/register", registerUser);
+
 router.post("/login",  login);
 
-// router.patch("/:id",);
-// router.delete("/:id",)
+
+
