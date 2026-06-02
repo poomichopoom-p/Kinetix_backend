@@ -1,4 +1,4 @@
-import Orders from "../../modules/Model/Orders-modle.js";
+import { Orders } from "../Model/Orders-model.js";
 
 export const getOrder = async (req, res, next) => {
   try {
@@ -17,6 +17,6 @@ export const getOrder = async (req, res, next) => {
   }
 };
 
-export const newOrder = async (req,res,next) => {
-    const {costomerId, status, rental_plan, } = req.body || "" ;
-}
+export const newOrder = async (req, res, next) => {
+  const { costomerId, status, rental_plan } = req.body || "";
+};
