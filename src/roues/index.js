@@ -6,6 +6,6 @@ import { router as staffRouter } from "./staff.router/staff.router.js";
 export const router = Router();
 
 router.use("/users", usersRouter);
-router.use("/users", staffRouter);
-router.use("/users", productsRouter);
+router.use("/staff", staffRouter);
+router.use("/products", productsRouter);
 
