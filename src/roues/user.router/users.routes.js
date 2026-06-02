@@ -8,6 +8,5 @@ export const router = Router();
 
 router.post("/register", registerUser);
 router.post("/login", authUser, login);
+router.post("/login",authUser, );
 
-// router.patch("/:id",);
-// router.delete("/:id",)
