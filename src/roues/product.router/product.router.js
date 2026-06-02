@@ -10,8 +10,6 @@ export const router = Router();
 
 router.get("/", getProduct);
 
-
-
 router.get("/:brand", {getBrand})
 
 router.get("/:category", {getCategory} )

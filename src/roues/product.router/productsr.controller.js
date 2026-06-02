@@ -20,7 +20,7 @@ export const getBrand = (req,res,next) => {
     }
 }
 
-export const getCategory = (req, res) => {
+export const getCategory = (req, res, next) => {
     const {category} = req.body || "";
     if(!category){
         res.status(400).json({success: false, message:"category not found!"})
