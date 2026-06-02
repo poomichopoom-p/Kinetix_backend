@@ -3,22 +3,16 @@ import authUser from "../../middelware/authUser.js";
 import {
   deleteUserById,
   getUserById,
+  login,
+  registerUser,
   updateUserById,
-} from "./user.controller.js";
+} from "../../modules/controller/user.controller.js";
 
 export const router = Router();
+
+router.post("/register", registerUser);
+router.post("/login", login);
 
 router.get("/:id", authUser, getUserById);
 router.patch("/:id", authUser, updateUserById);
 router.delete("/:id", authUser, deleteUserById);
-import { login, registerUser } from "./user.controller.js";
-
-export const router = Router();
-
-// router.get("/:id", );
-
-router.post("/register", registerUser);
-router.post("/login", authUser, login);
-
-// router.patch("/:id",);
-// router.delete("/:id",)
