@@ -28,7 +28,7 @@ export const registerUser = async (req, res, next) => {
     // res.status(400).json({success:false,message:"worng pattern"})
   }
 
-  // try {
+  try {
     const doc = await User.create({
       name: trimName,
       email: trimEmail,
@@ -42,13 +42,13 @@ export const registerUser = async (req, res, next) => {
     return res
       .status(201)
       .json({ success: true, message: "successful created!", data: safe });
-  // } catch (err) {
-  //   const error = new Error("user");
-  //   err.status = 404;
-  //   err.message = "created fail !";
-  //   // res.status(400).json({success:false,message:"error!",error:err})
-  //   return next(error);
-  // }
+  } catch (err) {
+    const error = new Error("user");
+    err.status = 404;
+    err.message = "created fail !";
+    res.status(400).json({success:false,message:"error!",error:err})
+    return next(error);
+  }
 };
 
 export const login = async (req, res, next) => {
