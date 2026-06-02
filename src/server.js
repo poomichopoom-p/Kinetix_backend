@@ -30,7 +30,7 @@ app.use((err, req, res, next) => {
     message: err.message || "Server is error!",
     path: req.originalUrl,
     method: req.method,
-    timestamp: new Data().toISOString(),
+    timestamp: new Date().toISOString(),
     stack: err.stack,
   });
 });

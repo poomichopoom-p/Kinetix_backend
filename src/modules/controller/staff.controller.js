@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { Staff } from "../Model/staff-model";
+import { Staff } from "../Model/staff-model.js";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
