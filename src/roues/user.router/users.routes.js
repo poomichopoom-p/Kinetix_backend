@@ -1,6 +1,6 @@
 import { Router } from "express";
 import authUser from "../../middelware/authUser.js";
-import { login, registerUser } from "./user.controller.js";
+import { login, registerUser } from "../../modules/controller/user.controller.js";
 
 export const router = Router();
 
