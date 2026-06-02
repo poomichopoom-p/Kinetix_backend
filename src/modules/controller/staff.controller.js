@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 import { staff } from "../Model/staff-model.js";
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // PATCH /api/staff/:id
 export const updateStaff = async (req, res, next) => {
@@ -23,8 +26,8 @@ export const updateStaff = async (req, res, next) => {
       id,
       updateData,
       {
-        new: true,          // return the document after update
-        runValidators: true // enforce schema validation on update
+        new: true,
+        runValidators: true
       }
     );
 
@@ -35,5 +38,60 @@ export const updateStaff = async (req, res, next) => {
     return res.status(200).json({ data: updated });
   } catch (err) {
     next(err);
+  }
+};
+
+export const registerStaff = async (req, res, next) => {
+  const { name, surname, email, password, address } = req.body || {};
+
+  const trimName = String(name || "").trim();
+  const trimSurname = String(surname || "").trim();
+  const trimEmail = String(email || "").trim().toLowerCase();
+
+  if (!trimName || !trimSurname || !trimEmail || !password) {
+    const err = new Error("name, surname, email, password are required!");
+    err.success = false;
+    err.name = "ValidationError";
+    err.status = 400;
+    return next(err);
+  }
+
+  if (!EMAIL_PATTERN.test(trimEmail)) {
+    const err = new Error("Invalid email pattern");
+    err.name = "ValidationError";
+    err.status = 400;
+    return next(err);
+  }
+
+  try {
+    const doc = await staff.create({
+      name: trimName,
+      surname: trimSurname,
+      email: trimEmail,
+      password,
+      ...(address ? { address } : {}),
+      role: "staff",
+    });
+
+    const safe = doc.toObject();
+    delete safe.password;
+
+    return res.status(201).json({
+      success: true,
+      message: "Staff created successfully!",
+      data: safe,
+    });
+  } catch (err) {
+    if (err.code === 11000) {
+      const dupErr = new Error("Email already exists");
+      dupErr.name = "DuplicateError";
+      dupErr.status = 409;
+      dupErr.message = "This email is already registered";
+      return next(dupErr);
+    }
+
+    err.status = 500;
+    err.message = "Failed to create staff";
+    return next(err);
   }
 };
