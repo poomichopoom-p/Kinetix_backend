@@ -21,7 +21,7 @@ const staffSchema = new mongoose.Schema(
       match: /^a/,
     },
     address: { type: String, minlength: 6, maxlength: 50 },
-    role: { enum: ["staff", "admin"], default: "staff" },
+    role: { enum: ["staff", "admin"], default: ["staff"] },
     is_active: { type: Boolean, default: true },
   },
   { timestamps: true },

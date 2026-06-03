@@ -52,36 +52,6 @@ export const registerUser = async (req, res, next) => {
   }
 };
 
-export const login = async (req, res, next) => {
-  const { email, password } = req.body || "";
-  const userEmail = String(email || "")
-    .trim()
-    .toLowerCase();
-
-  if (!userEmail || !password) {
-    return res
-      .status(400)
-      .json({ success: false, message: "email or password not correct !" });
-  }
-  try {
-    if (!isValidUserId(req, res)) return;
-
-    if (!isOwner(req)) {
-      return res.status(403).json({
-        success: false,
-        message: "You can only access your own user data",
-      });
-    }
-
-    const user = await User.findById(req.params.id);
-
-    err.message = "created fail !";
-    res.status(400).json({ success: false, message: "error!", error: err });
-    return next(error);
-  }catch(err){
-    next(err)
-  }
-};
 
 export const login = async (req, res, next) => {
   const { email, password } = req.body || "";
@@ -129,6 +99,137 @@ export const login = async (req, res, next) => {
         name: user.name,
         userRank: user.userRank,
       },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+export const getUserById = async (req, res, next) => {
+  try {
+    if (!isValidUserId(req, res)) return;
+
+    if (!isOwner(req)) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only access your own user data",
+      });
+    }
+
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: sanitizeUser(user),
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateUserById = async (req, res, next) => {
+  try {
+    if (!isValidUserId(req, res)) return;
+
+    if (!isOwner(req)) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only update your own user data",
+      });
+    }
+
+    const allowedFields = ["name", "surname", "email", "password", "address"];
+
+    const updates = {};
+
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    }
+
+    if (updates.email) {
+      updates.email = String(updates.email).trim().toLowerCase();
+
+      if (!EMAIL_PATTERN.test(updates.email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid email format",
+        });
+      }
+    }
+
+    if (updates.name) {
+      updates.name = String(updates.name).trim();
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid fields to update",
+      });
+    }
+
+    // ✅ ใช้ findById + save เพื่อให้ mongoose middleware ทำงาน
+    // สำคัญมากถ้ามี pre("save") สำหรับ hash password
+    const user = await User.findById(req.params.id).select("+password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    Object.assign(user, updates);
+
+    await user.save({
+      validateModifiedOnly: true,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Update user success",
+      data: sanitizeUser(user),
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteUserById = async (req, res, next) => {
+  try {
+    if (!isValidUserId(req, res)) return;
+
+    if (!isOwner(req)) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only delete your own account",
+      });
+    }
+
+    const user = await User.findByIdAndDelete(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.clearCookie("accessToken");
+
+    return res.status(200).json({
+      success: true,
+      message: "Delete user success",
     });
   } catch (err) {
     next(err);
