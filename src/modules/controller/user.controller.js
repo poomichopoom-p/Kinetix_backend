@@ -1,4 +1,4 @@
-import  jwt  from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { User } from "../Model/users-model.js";
 import bcrypt from "bcrypt";
 
@@ -15,7 +15,7 @@ export const registerUser = async (req, res, next) => {
     const err = new Error("name,surname,email,password,address  are requied!");
     err.success = false;
     err.name = "VaridationError";
-    err.status = 400;
+    err.status = 404;
     err.message = "name,surname,email,password,address  are requied!";
     return next(err);
   }
@@ -35,6 +35,7 @@ export const registerUser = async (req, res, next) => {
       password,
       ...(address ? { address } : {}),
     });
+    console.log(address)
     const safe = doc.toObject();
     delete safe.password;
 
@@ -45,7 +46,7 @@ export const registerUser = async (req, res, next) => {
     const error = new Error("user");
     err.status = 404;
     err.message = "created fail !";
-    // res.status(400).json({success:false,message:"error!",error:err})
+    res.status(400).json({success:false,message:"error!",error:err})
     return next(error);
   }
 };
@@ -59,7 +60,7 @@ export const login = async (req, res, next) => {
       .json({ success: false, message: "email or password not correct !" });
   }
   try {
-    const user = await mongoose.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res
         .status(404)
@@ -80,7 +81,7 @@ export const login = async (req, res, next) => {
 
     res.cookie("accessToken", token, {
       httpOnly: true,
-      secure: isprod ? "none" : "lax",
+      secure: isprod,
       path: "/",
       maxAge: 120 * 120 * 2000,
     });
@@ -90,7 +91,6 @@ export const login = async (req, res, next) => {
       user: {
         _id: user._id,
         email: user.email,
-        password: user.password,
         name: user.name,
         userRank: user.userRank,
       },

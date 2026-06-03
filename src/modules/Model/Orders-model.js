@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-import { priceSchema } from "./products-model.js";
+import { rentalSchema } from "./products-model.js";
 
 const OrdersItem = new mongoose.Schema({
   ProductId: {
@@ -9,7 +9,7 @@ const OrdersItem = new mongoose.Schema({
     required: true,
   },
   status: { type: String, required: true },
-  rental_plan: priceSchema,
+  rental_plan: rentalSchema,
   sku_color_code: { type: String, required: true, trim: true },
   deposit_amount: { type: Number, required: true },
 });
@@ -28,6 +28,8 @@ const orderSchema = new mongoose.Schema({
   suspended_at: { type: Date },
   rental_stat_at: { type: Date },
   canceled_at: { type: Date },
+  // soft delete flag — false means the order is deactivated, not physically removed
+  is_active: { type: Boolean, default: true },
 });
 
 export const Orders = mongoose.model("order", orderSchema);

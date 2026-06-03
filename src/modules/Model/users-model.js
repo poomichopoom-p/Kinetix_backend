@@ -15,10 +15,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["bronze", "gold", "silver", "platinum", "Diamond"],
     default: "bronze",
-  },
-});
+  }
+},{timestamps: true});
 
-userSchema.pre("save", async () => {
+userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 12);
 });
