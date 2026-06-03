@@ -62,3 +62,6 @@ router.post("/createProduct", createProduct);
 CREATE brand
 */
 router.post("/newBrand", createNewBrand);
+router.get("/:brand", getBrand);
+
+router.get("/:category", getCategory);

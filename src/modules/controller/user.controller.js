@@ -37,7 +37,7 @@ export const registerUser = async (req, res, next) => {
       password,
       ...(address ? { address } : {}),
     });
-    console.log(address)
+    console.log(address);
     const safe = doc.toObject();
     delete safe.password;
 
@@ -45,25 +45,35 @@ export const registerUser = async (req, res, next) => {
       .status(201)
       .json({ success: true, message: "successful created!", data: safe });
   } catch (err) {
+<<<<<<< HEAD
     const error = new Error("created fail !");
     error.status = 400;
     error.message = "created fail !";
     // Respond with the original error details for debugging, but pass a normalized error to next()
     res.status(400).json({ success: false, message: "error!", error: err?.message || err });
+=======
+    const error = new Error("user");
+    err.status = 404;
+    err.message = "created fail !";
+    res.status(400).json({ success: false, message: "error!", error: err });
+>>>>>>> 27c13d3 (test-create-ProductDone)
     return next(error);
   }
 };
 
 export const login = async (req, res, next) => {
   const { email, password } = req.body || "";
+  const userEmail = String(email || "")
+    .trim()
+    .toLowerCase();
 
-  if (!email || !password) {
+  if (!userEmail || !password) {
     return res
       .status(400)
       .json({ success: false, message: "email or password not correct !" });
   }
   try {
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ userEmail }).select("+password");
     if (!user) {
       return res
         .status(404)
