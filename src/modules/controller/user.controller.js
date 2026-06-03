@@ -35,7 +35,7 @@ export const registerUser = async (req, res, next) => {
       password,
       ...(address ? { address } : {}),
     });
-    console.log(address)
+    console.log(address);
     const safe = doc.toObject();
     delete safe.password;
 
@@ -46,21 +46,24 @@ export const registerUser = async (req, res, next) => {
     const error = new Error("user");
     err.status = 404;
     err.message = "created fail !";
-    res.status(400).json({success:false,message:"error!",error:err})
+    res.status(400).json({ success: false, message: "error!", error: err });
     return next(error);
   }
 };
 
 export const login = async (req, res, next) => {
   const { email, password } = req.body || "";
+  const userEmail = String(email || "")
+    .trim()
+    .toLowerCase();
 
-  if (!email || !password) {
+  if (!userEmail || !password) {
     return res
       .status(400)
       .json({ success: false, message: "email or password not correct !" });
   }
   try {
-    const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ userEmail }).select("+password");
     if (!user) {
       return res
         .status(404)
