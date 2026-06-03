@@ -23,13 +23,21 @@ const PORT = process.env.PORT || 5000;
 
 app.use(helmet());
 app.use(cookieParser());
-app.use(cors({ origin: "*", credentials: false })); // TODO: revert to cors(corsOption) before production
+
+app.use(cors(corsOption));
+
 app.use(express.json());
 app.use(limiter);
 
+app.get("/", (req, res) => {
+  res.send("Welcome to Kinetix");
+});
+// http//localhost:5000/api
+app.use("/api", apiRouter);
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(err.status || 500).json({
+  const response = {
     success: false,
     message: err.message || "Server is error!",
     path: req.originalUrl,
@@ -39,11 +47,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.get("/", (req, res) => {
-  res.send("Welcome to Kinetix");
+  if (process.env.NODE_ENV !== "production") {
+    response.stack = err.stack;
+  }
+
+  res.status(err.status || 500).json(response);
 });
-// http//localhost:5000/api
-app.use("/api", apiRouter);
 
 await connectDB();
 
