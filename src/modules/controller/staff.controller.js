@@ -1,8 +1,50 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import { staff } from "../Model/staff-model.js";
+import { Staff } from "../Model/staff-model.js";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// GET /api/staff
+export const getAllStaff = async (req, res, next) => {
+  const { role } = req.query;
+  const filter = { is_active: true };
+  if (role) filter.role = role;
+
+  try {
+    const staffList = await Staff.find(filter);
+    return res.status(200).json({ count: staffList.length, data: staffList });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /api/staff/:staffId
+export const getStaffById = async (req, res, next) => {
+  const { staffId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(staffId)) {
+    return res.status(400).json({ message: "Invalid staff ID" });
+  }
+
+  try {
+    let query = Staff.findById(staffId);
+
+    if (req.query.fields) {
+      const fields = req.query.fields.split(",").join(" ");
+      query = query.select(fields);
+    }
+
+    const staffMember = await query;
+
+    if (!staffMember) {
+      return res.status(404).json({ message: "Staff not found" });
+    }
+
+    return res.status(200).json({ data: staffMember });
+  } catch (err) {
+    next(err);
+  }
+};
 
 // PATCH /api/staff/:id
 export const updateStaff = async (req, res, next) => {
@@ -22,7 +64,7 @@ export const updateStaff = async (req, res, next) => {
   if (is_active !== undefined) updateData.is_active = is_active;
 
   try {
-    const updated = await staff.findByIdAndUpdate(
+    const updated = await Staff.findByIdAndUpdate(
       id,
       updateData,
       {
@@ -64,7 +106,7 @@ export const registerStaff = async (req, res, next) => {
   }
 
   try {
-    const doc = await staff.create({
+    const doc = await Staff.create({
       name: trimName,
       surname: trimSurname,
       email: trimEmail,
