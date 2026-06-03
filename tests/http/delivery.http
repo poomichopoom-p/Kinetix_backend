@@ -1,0 +1,280 @@
+@baseUrl = http://localhost:5000/api
+@adminToken = PASTE_ADMIN_TOKEN_HERE
+@driverToken = PASTE_DRIVER_TOKEN_HERE
+@userToken = PASTE_USER_TOKEN_HERE
+@jobId = PASTE_JOB_ID_HERE
+
+# ─────────────────────────────────────────────────────────────
+# AUTH
+# ─────────────────────────────────────────────────────────────
+
+### Register ADMIN
+POST {{baseUrl}}/delivery-auth/register
+Content-Type: application/json
+
+{
+  "name": "Alice Admin",
+  "email": "admin@test.com",
+  "password": "123456",
+  "role": "ADMIN"
+}
+
+###
+
+### Register DRIVER
+POST {{baseUrl}}/delivery-auth/register
+Content-Type: application/json
+
+{
+  "name": "Bob Driver",
+  "email": "driver@test.com",
+  "password": "123456",
+  "role": "DRIVER"
+}
+
+###
+
+### Register USER
+POST {{baseUrl}}/delivery-auth/register
+Content-Type: application/json
+
+{
+  "name": "Charlie User",
+  "email": "user@test.com",
+  "password": "123456",
+  "role": "USER"
+}
+
+###
+
+### Login ADMIN → คัดลอก token ไปใส่ @adminToken ด้านบน
+POST {{baseUrl}}/delivery-auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@test.com",
+  "password": "123456"
+}
+
+###
+
+### Login DRIVER → คัดลอก token ไปใส่ @driverToken
+POST {{baseUrl}}/delivery-auth/login
+Content-Type: application/json
+
+{
+  "email": "driver@test.com",
+  "password": "123456"
+}
+
+###
+
+### Login USER → คัดลอก token ไปใส่ @userToken
+POST {{baseUrl}}/delivery-auth/login
+Content-Type: application/json
+
+{
+  "email": "user@test.com",
+  "password": "123456"
+}
+
+###
+
+### Get My Profile
+GET {{baseUrl}}/delivery-auth/me
+Authorization: Bearer {{adminToken}}
+
+# ─────────────────────────────────────────────────────────────
+# DELIVERY FLOW
+# ─────────────────────────────────────────────────────────────
+
+### 1. สร้าง Job (USER) → คัดลอก _id ไปใส่ @jobId ด้านบน
+POST {{baseUrl}}/jobs
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "jobType": "DELIVERY"
+}
+
+###
+
+### 2. Admin ยืนยัน
+PATCH {{baseUrl}}/jobs/{{jobId}}/admin-confirm
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "remark": "อนุมัติแล้ว"
+}
+
+###
+
+### 3. Driver รับงาน
+PATCH {{baseUrl}}/jobs/{{jobId}}/driver-confirm
+Authorization: Bearer {{driverToken}}
+
+###
+
+### 4. รับสินค้า
+PATCH {{baseUrl}}/jobs/{{jobId}}/pickup
+Authorization: Bearer {{driverToken}}
+
+###
+
+### 5. เริ่มจัดส่ง
+PATCH {{baseUrl}}/jobs/{{jobId}}/in-transit
+Authorization: Bearer {{driverToken}}
+
+###
+
+### 6. ส่งสำเร็จ (DELIVERED — final state)
+PATCH {{baseUrl}}/jobs/{{jobId}}/complete
+Authorization: Bearer {{driverToken}}
+
+# ─────────────────────────────────────────────────────────────
+# RETURN FLOW
+# ─────────────────────────────────────────────────────────────
+
+### 1. สร้าง Return Job → คัดลอก _id ไปใส่ @jobId
+POST {{baseUrl}}/jobs
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "jobType": "RETURN"
+}
+
+###
+
+### 2. Admin อนุมัติคืน
+PATCH {{baseUrl}}/jobs/{{jobId}}/return-approve
+Authorization: Bearer {{adminToken}}
+
+###
+
+### 3. Driver รับงานคืน
+PATCH {{baseUrl}}/jobs/{{jobId}}/return-driver-confirm
+Authorization: Bearer {{driverToken}}
+
+###
+
+### 4. รับสินค้าคืน
+PATCH {{baseUrl}}/jobs/{{jobId}}/return-pickup
+Authorization: Bearer {{driverToken}}
+
+###
+
+### 5. เริ่มส่งคืน
+PATCH {{baseUrl}}/jobs/{{jobId}}/return-in-transit
+Authorization: Bearer {{driverToken}}
+
+###
+
+### 6. คืนสำเร็จ (RETURN_COMPLETED — final state)
+PATCH {{baseUrl}}/jobs/{{jobId}}/return-complete
+Authorization: Bearer {{driverToken}}
+
+# ─────────────────────────────────────────────────────────────
+# REJECT FLOW
+# ─────────────────────────────────────────────────────────────
+
+### 1. สร้าง Job ใหม่ → คัดลอก _id ไปใส่ @jobId
+POST {{baseUrl}}/jobs
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "jobType": "DELIVERY"
+}
+
+###
+
+### 2. Admin ปฏิเสธ
+PATCH {{baseUrl}}/jobs/{{jobId}}/reject
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "remark": "สินค้าไม่ครบ"
+}
+
+###
+
+### 3. Driver ยืนยันปฏิเสธ
+PATCH {{baseUrl}}/jobs/{{jobId}}/reject-driver-confirm
+Authorization: Bearer {{driverToken}}
+
+###
+
+### 4. Admin ปิดงาน (REJECT_APPROVED — final state)
+PATCH {{baseUrl}}/jobs/{{jobId}}/reject-approve
+Authorization: Bearer {{adminToken}}
+
+# ─────────────────────────────────────────────────────────────
+# QUERY & NOTIFICATIONS
+# ─────────────────────────────────────────────────────────────
+
+### ดู Job ทั้งหมด
+GET {{baseUrl}}/jobs
+Authorization: Bearer {{adminToken}}
+
+###
+
+### ดู Job ตาม ID
+GET {{baseUrl}}/jobs/{{jobId}}
+Authorization: Bearer {{adminToken}}
+
+###
+
+### ดู Timeline
+GET {{baseUrl}}/jobs/{{jobId}}/timeline
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Filter by status
+GET {{baseUrl}}/jobs?status=IN_TRANSIT
+Authorization: Bearer {{adminToken}}
+
+###
+
+### Filter by jobType
+GET {{baseUrl}}/jobs?jobType=RETURN
+Authorization: Bearer {{adminToken}}
+
+###
+
+### ดู Notifications
+GET {{baseUrl}}/jobs/notifications
+Authorization: Bearer {{userToken}}
+
+###
+
+### Mark Notifications as Read
+PATCH {{baseUrl}}/jobs/notifications/read
+Authorization: Bearer {{userToken}}
+
+# ─────────────────────────────────────────────────────────────
+# ERROR CASES
+# ─────────────────────────────────────────────────────────────
+
+### 401 — ไม่มี Token
+GET {{baseUrl}}/jobs
+
+###
+
+### 403 — Role ผิด (USER ทำ admin-confirm)
+PATCH {{baseUrl}}/jobs/{{jobId}}/admin-confirm
+Authorization: Bearer {{userToken}}
+
+###
+
+### 400 — jobId รูปแบบผิด
+GET {{baseUrl}}/jobs/invalid-id
+
+###
+
+### 409 — Transition ผิดลำดับ (ข้าม step)
+PATCH {{baseUrl}}/jobs/{{jobId}}/complete
+Authorization: Bearer {{driverToken}}

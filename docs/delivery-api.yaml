@@ -1,0 +1,377 @@
+openapi: 3.0.3
+info:
+  title: Delivery & Return Management API
+  version: 1.0.0
+  description: |
+    Production-ready API for managing delivery, return, and reject job workflows.
+
+    ## Roles
+    - **USER** — Creates jobs, tracks status
+    - **DRIVER** — Confirms, picks up, delivers jobs
+    - **ADMIN** — Approves, assigns, closes jobs
+
+    ## Authentication
+    All `/jobs` endpoints require a Bearer JWT token.
+
+servers:
+  - url: http://localhost:5000/api
+    description: Local development
+
+tags:
+  - name: Auth
+    description: Register and login for delivery system users
+  - name: Jobs
+    description: Job CRUD and state machine transitions
+  - name: Notifications
+    description: User notification management
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Job:
+      type: object
+      properties:
+        _id:           { type: string }
+        jobNo:         { type: string, example: JOB-000001 }
+        jobType:       { type: string, enum: [DELIVERY, RETURN] }
+        customerId:    { type: object, properties: { _id: { type: string }, name: { type: string }, email: { type: string } } }
+        driverId:      { type: object, nullable: true }
+        status:        { type: string }
+        rejectReason:  { type: string, nullable: true }
+        pickupAt:      { type: string, format: date-time, nullable: true }
+        deliveredAt:   { type: string, format: date-time, nullable: true }
+        returnedAt:    { type: string, format: date-time, nullable: true }
+        proofOfDeliveryImage: { type: string, nullable: true }
+        createdAt:     { type: string, format: date-time }
+        updatedAt:     { type: string, format: date-time }
+
+    HistoryEntry:
+      type: object
+      properties:
+        _id:        { type: string }
+        jobId:      { type: string }
+        oldStatus:  { type: string }
+        newStatus:  { type: string }
+        actionBy:   { type: object, properties: { _id: { type: string }, name: { type: string } } }
+        actionRole: { type: string, enum: [USER, DRIVER, ADMIN] }
+        remark:     { type: string }
+        createdAt:  { type: string, format: date-time }
+
+    Notification:
+      type: object
+      properties:
+        _id:       { type: string }
+        userId:    { type: string }
+        title:     { type: string }
+        message:   { type: string }
+        isRead:    { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+    Error:
+      type: object
+      properties:
+        message: { type: string }
+
+paths:
+  # ── Auth ────────────────────────────────────────────────────────────────────
+  /delivery-auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new delivery user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, role]
+              properties:
+                name:     { type: string }
+                email:    { type: string, format: email }
+                password: { type: string, minLength: 6 }
+                role:     { type: string, enum: [USER, DRIVER, ADMIN] }
+      responses:
+        "201": { description: Created }
+        "400": { description: Validation error, content: { application/json: { schema: { $ref: "#/components/schemas/Error" } } } }
+        "409": { description: Email already exists }
+
+  /delivery-auth/login:
+    post:
+      tags: [Auth]
+      summary: Login and receive JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:    { type: string, format: email }
+                password: { type: string }
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  user:  { type: object, properties: { _id: { type: string }, name: { type: string }, email: { type: string }, role: { type: string } } }
+        "401": { description: Invalid credentials }
+
+  /delivery-auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: User profile }
+        "401": { description: Unauthorized }
+
+  # ── Jobs ─────────────────────────────────────────────────────────────────────
+  /jobs:
+    get:
+      tags: [Jobs]
+      summary: List jobs (filtered by role)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string }
+        - in: query
+          name: jobType
+          schema: { type: string, enum: [DELIVERY, RETURN] }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 20 }
+      responses:
+        "200":
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: { type: integer }
+                  page:  { type: integer }
+                  limit: { type: integer }
+                  data:  { type: array, items: { $ref: "#/components/schemas/Job" } }
+
+    post:
+      tags: [Jobs]
+      summary: Create a new job (USER or ADMIN)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [jobType]
+              properties:
+                jobType:  { type: string, enum: [DELIVERY, RETURN] }
+                driverId: { type: string }
+      responses:
+        "201": { description: Job created, content: { application/json: { schema: { type: object, properties: { data: { $ref: "#/components/schemas/Job" } } } } } }
+        "400": { description: Validation error }
+
+  /jobs/{id}:
+    get:
+      tags: [Jobs]
+      summary: Get job by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Job detail }
+        "400": { description: Invalid ID }
+        "404": { description: Not found }
+
+  /jobs/{id}/timeline:
+    get:
+      tags: [Jobs]
+      summary: Get job status history timeline
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Timeline
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: "#/components/schemas/HistoryEntry" } }
+
+  # ── Delivery Transitions ────────────────────────────────────────────────────
+  /jobs/{id}/admin-confirm:
+    patch:
+      tags: [Jobs]
+      summary: "ADMIN: WAITING_FOR_ADMIN_CONFIRMATION → WAITING_FOR_DRIVER_CONFIRMATION"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { remark: { type: string } } } } } }
+      responses:
+        "200": { description: Transitioned }
+        "403": { description: Forbidden }
+        "409": { description: Invalid transition }
+
+  /jobs/{id}/driver-confirm:
+    patch:
+      tags: [Jobs]
+      summary: "DRIVER: WAITING_FOR_DRIVER_CONFIRMATION → DRIVER_CONFIRMED"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "200": { description: OK }, "403": { description: Forbidden }, "409": { description: Conflict } }
+
+  /jobs/{id}/pickup:
+    patch:
+      tags: [Jobs]
+      summary: "DRIVER: DRIVER_CONFIRMED → PICKED_UP"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "200": { description: OK } }
+
+  /jobs/{id}/in-transit:
+    patch:
+      tags: [Jobs]
+      summary: "DRIVER: PICKED_UP → IN_TRANSIT"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "200": { description: OK } }
+
+  /jobs/{id}/complete:
+    patch:
+      tags: [Jobs]
+      summary: "DRIVER: IN_TRANSIT → DELIVERED (final)"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "200": { description: OK } }
+
+  # ── Return Transitions ──────────────────────────────────────────────────────
+  /jobs/{id}/return-approve:
+    patch:
+      tags: [Jobs]
+      summary: "ADMIN: WAITING_FOR_RETURN_APPROVAL → RETURN_DRIVER_PENDING"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "200": { description: OK } }
+
+  /jobs/{id}/return-driver-confirm:
+    patch:
+      tags: [Jobs]
+      summary: "DRIVER: RETURN_DRIVER_PENDING → RETURN_DRIVER_CONFIRMED"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "200": { description: OK } }
+
+  /jobs/{id}/return-pickup:
+    patch:
+      tags: [Jobs]
+      summary: "DRIVER: RETURN_DRIVER_CONFIRMED → RETURN_PICKED_UP"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "200": { description: OK } }
+
+  /jobs/{id}/return-in-transit:
+    patch:
+      tags: [Jobs]
+      summary: "DRIVER: RETURN_PICKED_UP → RETURN_IN_TRANSIT"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "200": { description: OK } }
+
+  /jobs/{id}/return-complete:
+    patch:
+      tags: [Jobs]
+      summary: "DRIVER: RETURN_IN_TRANSIT → RETURN_COMPLETED (final)"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "200": { description: OK } }
+
+  # ── Reject Transitions ──────────────────────────────────────────────────────
+  /jobs/{id}/reject:
+    patch:
+      tags: [Jobs]
+      summary: "ADMIN: WAITING_FOR_ADMIN_CONFIRMATION → REJECT_REQUESTED"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      requestBody: { content: { application/json: { schema: { type: object, properties: { remark: { type: string } } } } } }
+      responses: { "200": { description: OK } }
+
+  /jobs/{id}/reject-driver-confirm:
+    patch:
+      tags: [Jobs]
+      summary: "DRIVER: REJECT_REQUESTED → REJECT_DRIVER_CONFIRMED"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "200": { description: OK } }
+
+  /jobs/{id}/reject-approve:
+    patch:
+      tags: [Jobs]
+      summary: "ADMIN: REJECT_DRIVER_CONFIRMED → REJECT_APPROVED (final)"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      responses: { "200": { description: OK } }
+
+  # ── File Upload ─────────────────────────────────────────────────────────────
+  /jobs/{id}/upload-proof:
+    patch:
+      tags: [Jobs]
+      summary: "DRIVER: Upload proof-of-delivery image"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ in: path, name: id, required: true, schema: { type: string } }]
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                proof:
+                  type: string
+                  format: binary
+      responses:
+        "200": { description: Image uploaded }
+        "400": { description: No file / invalid type }
+
+  # ── Notifications ────────────────────────────────────────────────────────────
+  /jobs/notifications:
+    get:
+      tags: [Notifications]
+      summary: Get my notifications (latest 50)
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Notification list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: "#/components/schemas/Notification" } }
+
+  /jobs/notifications/read:
+    patch:
+      tags: [Notifications]
+      summary: Mark all my notifications as read
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200": { description: Marked as read }
