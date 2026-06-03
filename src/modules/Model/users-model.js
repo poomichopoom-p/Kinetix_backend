@@ -16,8 +16,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["bronze", "gold", "silver", "platinum", "Diamond"],
     default: "bronze",
-  },
-});
+  }
+},{timestamps: true});
 
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;

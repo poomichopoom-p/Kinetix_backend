@@ -10,10 +10,10 @@ const staffSchema = new mongoose.Schema(
       minlength: 4,
       maxlength: 30,
       match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-      Unique: true,
+      unique: true,
     },
     password: {
-      typr: String,
+      type: String,
       trim: true,
       select: false,
       minlength: 4,
@@ -21,8 +21,12 @@ const staffSchema = new mongoose.Schema(
       match: /^a/,
     },
     address: { type: String, minlength: 6, maxlength: 50 },
-    role: { trpe: String, enum: ["staff", "admin"], default: "staff" },
+    role: { type: String, enum: ["staff", "admin"], default: "staff" },
+    is_active: { type: Boolean, default: true },
   },
   { timestamps: true },
 );
-export const staff = mongoose.model("staff", staffSchema);
+
+
+export const Staff = mongoose.model("Staff", staffSchema, "staffs");
+
