@@ -5,14 +5,15 @@ import bcrypt from "bcrypt";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const registerUser = async (req, res, next) => {
-  const { name, email, password, address } = req.body || "";
+  const { name, surname, email, password, address } = req.body || "";
   const trimName = String(name || "").trim();
+  const trimSurname = String(surname || "").trim();
   const trimEmail = String(email || "")
     .trim()
     .toLowerCase();
 
-  if (!trimName || !trimEmail || !password) {
-    const err = new Error("name,surname,email,password,address  are requied!");
+  if (!trimName || !trimSurname || !trimEmail || !password) {
+    const err = new Error("name, surname, email, password, address are required!");
     err.success = false;
     err.name = "VaridationError";
     err.status = 404;
@@ -31,6 +32,7 @@ export const registerUser = async (req, res, next) => {
   try {
     const doc = await User.create({
       name: trimName,
+      surname: trimSurname,
       email: trimEmail,
       password,
       ...(address ? { address } : {}),
@@ -43,10 +45,11 @@ export const registerUser = async (req, res, next) => {
       .status(201)
       .json({ success: true, message: "successful created!", data: safe });
   } catch (err) {
-    const error = new Error("user");
-    err.status = 404;
-    err.message = "created fail !";
-    res.status(400).json({success:false,message:"error!",error:err})
+    const error = new Error("created fail !");
+    error.status = 400;
+    error.message = "created fail !";
+    // Respond with the original error details for debugging, but pass a normalized error to next()
+    res.status(400).json({ success: false, message: "error!", error: err?.message || err });
     return next(error);
   }
 };

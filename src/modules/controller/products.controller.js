@@ -1,19 +1,17 @@
 import { Brand } from "../Model/Brand-model.js";
 import { Products } from "../Model/products-model.js";
 
+/*
+GET ALL PRODUCTS
+*/
 export const getProduct = async (req, res, next) => {
   try {
-    const doc = await Products.find();
-    if (!doc) {
-      return res.status(500).json({
-        success: false,
-        message: "server error can't get Product!",
-        error: err,
-      });
-    }
+    const doc = await Products.find()
+      .populate("brandId");
+
     return res.status(200).json({
       success: true,
-      message: "Get Product Done!!",
+      message: "Products fetched successfully",
       data: doc,
     });
   } catch (err) {
@@ -21,55 +19,67 @@ export const getProduct = async (req, res, next) => {
   }
 };
 
+/*
+CREATE PRODUCT
+*/
 export const createProduct = async (req, res, next) => {
-  const { modelName, description, brandId, category, rentalPlan, variants } =
-    req.body || "";
-
-  console.log({
+  const {
     modelName,
     description,
     brandId,
+    gender,
     category,
     rentalPlan,
     variants,
-  });
-  if (!modelName || !variants || !brandId || !category || !rentalPlan) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Incomplete information." });
+  } = req.body || {};
+
+  if (
+    !modelName ||
+    !brandId ||
+    !gender ||
+    !category ||
+    !rentalPlan ||
+    !variants
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Incomplete information.",
+    });
   }
-  const { skuColorCode } = variants.skuColorCode;
-  const { colorName } = variants.colorName;
-  const { images } = variants.images;
-  const { sizes } = variants.sizes;
-  const { size } = sizes.size;
-  const { stock } = sizes.stock;
 
   try {
     const doc = await Products.create({
-      modelName: modelName,
-      variants: variants,
-      brandId: brandId,
-      category: category,
-      rentalPlan: rentalPlan,
+      modelName,
+      description,
+      brandId,
+      gender,
+      category,
+      rentalPlan,
+      variants,
     });
-    return res
-      .status(201)
-      .json({ success: true, message: "Create successful!", data: doc });
+
+    return res.status(201).json({
+      success: true,
+      message: "Product created successfully!",
+      data: doc,
+    });
   } catch (err) {
     next(err);
   }
 };
 
+/*
+CREATE BRAND
+*/
 export const createNewBrand = async (req, res, next) => {
   const { brandName, model } = req.body || {};
+
   const brand = String(brandName || "").trim();
 
-  console.log(brand);
   if (!brand) {
-    return res.status(404).json({
+    return res.status(400).json({
       success: false,
-      message: "Brand name is required!",
+      message: "Brand name is required",
     });
   }
 
@@ -81,7 +91,34 @@ export const createNewBrand = async (req, res, next) => {
 
     return res.status(201).json({
       success: true,
-      message: "Brand created successfully!",
+      message: "Brand created successfully",
+      data: doc,
+    });
+  } catch (err) {
+    // Check for duplicate key error (MongoDB error code 11000)
+    if (err.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: `Brand with name '${brand}' already exists.`,
+      });
+    }
+    next(err); // Pass other errors to the next middleware
+  }
+};
+
+/*
+GET BRAND
+GET /api/products/brand/Nike
+*/
+export const getBrand = async (req, res, next) => {
+  const { brand } = req.params;
+
+  try {
+    const doc = await Brand.find({ brandName: brand });
+
+    return res.status(200).json({
+      success: true,
+      message: "found!",
       data: doc,
     });
   } catch (err) {
@@ -89,33 +126,21 @@ export const createNewBrand = async (req, res, next) => {
   }
 };
 
-export const getBrand = async (req, res, next) => {
-  const { brand } = req.body || "";
-  if (!brand) {
-    res.status(400).json({ success: false, message: "brand not found!" });
-  }
-
-  try {
-    const doc = await Brand.find(brand);
-    return res
-      .status(200)
-      .json({ success: true, message: "founded!", data: doc });
-  } catch (err) {
-    next(err);
-  }
-};
-
+/*
+GET PRODUCTS BY CATEGORY
+GET /api/products/category/Road
+*/
 export const getCategory = async (req, res, next) => {
-  const { category } = req.body || "";
-  if (!category) {
-    res.status(400).json({ success: false, message: "category not found!" });
-  }
+  const { category } = req.params;
 
   try {
-    const doc = await Products.find(category);
-    return res
-      .status(200)
-      .json({ success: true, message: "founded!", data: doc });
+    const doc = await Products.find({ category });
+
+    return res.status(200).json({
+      success: true,
+      message: "found!",
+      data: doc,
+    });
   } catch (err) {
     next(err);
   }

@@ -1,0 +1,17 @@
+### Test Successful Login
+POST http://localhost:5000/api/users/login
+Content-Type: application/json
+
+{
+    "email": "jonhwick@example.com",
+    "password": "Wick00009"
+}
+
+### Test Wrong Password
+POST http://localhost:5000/api/users/login
+Content-Type: application/json
+
+{
+    "email": "jonhwick@exaple.com",
+    "password": "Wick00008"
+}
