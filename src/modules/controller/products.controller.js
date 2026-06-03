@@ -6,8 +6,7 @@ GET ALL PRODUCTS
 */
 export const getProduct = async (req, res, next) => {
   try {
-    const doc = await Products.find()
-      .populate("brandId");
+    const doc = await Products.find().populate("brandId");
 
     return res.status(200).json({
       success: true,

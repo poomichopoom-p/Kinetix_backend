@@ -5,16 +5,15 @@ import {
   createNewBrand,
   createProduct,
   getProduct,
-} from "../../modules/controller/products.controller.js";
-
-import {
   getBrand,
   getCategory,
 } from "../../modules/controller/products.controller.js";
+import { getShoeById } from "../../modules/controller/shoe.controller.js";
 
 export const router = Router();
 
 router.get("/", getProduct);
+router.get("/:id", getShoeById);
 router.post("/createProduct", createProduct);
 router.post("/newBrand", createNewBrand);
 
