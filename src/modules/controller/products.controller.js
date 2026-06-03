@@ -1,7 +1,6 @@
 import { Brand } from "../Model/Brand-model.js";
 import { Products } from "../Model/products-model.js";
 
-
 export const getProduct = async (req, res, next) => {
   try {
     const doc = await Products.find();
@@ -23,12 +22,21 @@ export const getProduct = async (req, res, next) => {
 };
 
 export const createProduct = async (req, res, next) => {
-  const { name, description, brandId, category, rentalPlan, variants } =
+  const { modelName, description, brandId, category, rentalPlan, variants } =
     req.body || "";
-  if (!name || !variants || !brandId || !category || !rentalPlan) {
+
+  console.log({
+    modelName,
+    description,
+    brandId,
+    category,
+    rentalPlan,
+    variants,
+  });
+  if (!modelName || !variants || !brandId || !category || !rentalPlan) {
     return res
       .status(404)
-      .json({ success: true, message: "Incomplete information." });
+      .json({ success: false, message: "Incomplete information." });
   }
   const { skuColorCode } = variants.skuColorCode;
   const { colorName } = variants.colorName;
@@ -39,7 +47,7 @@ export const createProduct = async (req, res, next) => {
 
   try {
     const doc = await Products.create({
-      name: name,
+      modelName: modelName,
       variants: variants,
       brandId: brandId,
       category: category,
@@ -54,50 +62,61 @@ export const createProduct = async (req, res, next) => {
 };
 
 export const createNewBrand = async (req, res, next) => {
-  const { brandName,model } = req.body || {};
+  const { brandName, model } = req.body || {};
   const brand = String(brandName || "").trim();
-  const m = String(model || "");
-  console.log(brandName,model);
- if(!brand){
-  return res.status(404).json({
-    success: false,
-    message:"Brand name is reqired!",
-    
-  });
-  try{
-    const doc = await Brand.create(brandName)
-  }catch(err){
-    next(err)
+
+  console.log(brand);
+  if (!brand) {
+    return res.status(404).json({
+      success: false,
+      message: "Brand name is required!",
+    });
   }
- }
+
+  try {
+    const doc = await Brand.create({
+      brandName: brand,
+      model: model ? [model] : [],
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Brand created successfully!",
+      data: doc,
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
+export const getBrand = async (req, res, next) => {
+  const { brand } = req.body || "";
+  if (!brand) {
+    res.status(400).json({ success: false, message: "brand not found!" });
+  }
 
-
-export const getBrand = async (req,res,next) => {
-    const {brand} = req.body || "";
-    if(!brand){
-        res.status(400).json({success: false, message:"brand not found!"})
-    }
-
-    try{
-        const doc = await Brand.find(brand);
-        return res.status(200).json({success:true,message:"founded!",data: doc})
-    }catch(err){
-        next(err);
-    }
-}
+  try {
+    const doc = await Brand.find(brand);
+    return res
+      .status(200)
+      .json({ success: true, message: "founded!", data: doc });
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const getCategory = async (req, res, next) => {
-    const {category} = req.body || "";
-    if(!category){
-        res.status(400).json({success: false, message:"category not found!"})
-    }
+  const { category } = req.body || "";
+  if (!category) {
+    res.status(400).json({ success: false, message: "category not found!" });
+  }
 
-    try{
-        const doc = await Products.find(category);
-        return res.status(200).json({success:true,message:"founded!",data: doc})
-    }catch(err){
-        next(err);
-    }
-}
+  try {
+    const doc = await Products.find(category);
+    return res
+      .status(200)
+      .json({ success: true, message: "founded!", data: doc });
+  } catch (err) {
+    next(err);
+  }
+};

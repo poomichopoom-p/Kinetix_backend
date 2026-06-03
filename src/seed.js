@@ -3,7 +3,7 @@ import { faker } from "@faker-js/faker";
 import { connectDB } from "./config/mongoDB.js";
 
 import { User } from "./modules/Model/users-model.js";
-import { staff } from "./modules/Model/staff-model.js";
+import { Staff as staff } from "./modules/Model/staff-model.js";
 import { Shoe } from "./modules/Model/Shoe-model.js";
 import { Orders } from "./modules/Model/Orders-model.js";
 import { Brand } from "./modules/Model/Brand-model.js";
