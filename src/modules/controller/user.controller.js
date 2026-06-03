@@ -2,7 +2,96 @@ import jwt from "jsonwebtoken";
 import { User } from "../Model/users-model.js";
 import bcrypt from "bcrypt";
 
+
+
+
+
+
+// ถ้าไฟล์นี้อยู่คนละ path ให้ปรับ import เป็น:
+// import { User } from "../../modules/users-model.js";
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+
+
+const sanitizeUser = (user) => {
+  const userObject = user.toObject();
+
+  // ✅ ห้ามส่ง password กลับไป frontend
+  delete userObject.password;
+
+  return userObject;
+};
+
+const isOwner = (req) => {
+  return req.user?._id?.toString() === req.params.id;
+};
+
+const isValidUserId = (req, res) => {
+  if (/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
+    return true;
+  }
+
+  res.status(400).json({
+    success: false,
+    message: "Invalid user id",
+  });
+
+  return false;
+};
+
+export const login = async (req, res, next) => {
+  const { email, password } = req.body || "";
+  const userEmail = String(email || "")
+    .trim()
+    .toLowerCase();
+
+  if (!userEmail || !password) {
+    return res
+      .status(400)
+      .json({ success: false, message: "email or password not correct !" });
+  }
+  try {
+    const user = await User.findOne({ userEmail }).select("+password");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "user not found!" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ success: false, message: " worng password!! " });
+    }
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRETKEY, {
+      expiresIn: "2h",
+    });
+    const isprod = process.env.NODE_ENV === "production";
+
+    res.cookie("accessToken", token, {
+      httpOnly: true,
+      secure: isprod,
+      path: "/",
+      maxAge: 120 * 120 * 2000,
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Login success!",
+      user: {
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+        userRank: user.userRank,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const registerUser = async (req, res, next) => {
   const { name, surname, email, password, address } = req.body || "";

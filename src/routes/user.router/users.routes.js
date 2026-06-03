@@ -18,5 +18,4 @@ router.get("/:id", authUser, getUserById);
 router.patch("/:id", authUser, updateUserById);
 router.delete("/:id", authUser, deleteUserById);
 
-router.post("/register", registerUser);
-router.post("/login", login);
+
