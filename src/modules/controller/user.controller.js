@@ -45,18 +45,11 @@ export const registerUser = async (req, res, next) => {
       .status(201)
       .json({ success: true, message: "successful created!", data: safe });
   } catch (err) {
-<<<<<<< HEAD
     const error = new Error("created fail !");
     error.status = 400;
     error.message = "created fail !";
     // Respond with the original error details for debugging, but pass a normalized error to next()
     res.status(400).json({ success: false, message: "error!", error: err?.message || err });
-=======
-    const error = new Error("user");
-    err.status = 404;
-    err.message = "created fail !";
-    res.status(400).json({ success: false, message: "error!", error: err });
->>>>>>> 27c13d3 (test-create-ProductDone)
     return next(error);
   }
 };

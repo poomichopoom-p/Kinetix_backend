@@ -23,7 +23,6 @@ export const getProduct = async (req, res, next) => {
 CREATE PRODUCT
 */
 export const createProduct = async (req, res, next) => {
-<<<<<<< HEAD
   const {
     modelName,
     description,
@@ -46,28 +45,10 @@ export const createProduct = async (req, res, next) => {
       success: false,
       message: "Incomplete information.",
     });
-=======
-  const { name, description, brandId, category, rentalPlan, variants } =
-    req.body || "";
-
-  // console.log({
-  //   modelName,
-  //   description,
-  //   brandId,
-  //   category,
-  //   rentalPlan,
-  //   variants,
-  // });
-  if (!name || !variants || !brandId || !category || !rentalPlan) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Incomplete information." });
->>>>>>> 27c13d3 (test-create-ProductDone)
   }
 
   try {
     const doc = await Products.create({
-<<<<<<< HEAD
       modelName,
       description,
       brandId,
@@ -81,13 +62,6 @@ export const createProduct = async (req, res, next) => {
       success: true,
       message: "Product created successfully!",
       data: doc,
-=======
-      name: name,
-      variants: variants,
-      brandId: brandId,
-      category: category,
-      rentalPlan: rentalPlan,
->>>>>>> 27c13d3 (test-create-ProductDone)
     });
   } catch (err) {
     next(err);
