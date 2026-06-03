@@ -18,6 +18,8 @@ router.get("/", getProduct);
 router.post("/createProduct", createProduct);
 router.post("/newBrand", createNewBrand);
 
-router.get("/:brand", getBrand);
+router.get("/:brand", getBrand)
 
-router.get("/:category", getCategory);
+router.get("/:category", getCategory)
+
+
