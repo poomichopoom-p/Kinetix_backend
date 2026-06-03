@@ -26,10 +26,4 @@ const authUser = async (req, res, next) => {
   }
 };
 
-<<<<<<< HEAD
-
 export default authUser;
-
-=======
-export default authUser;
->>>>>>> poom
