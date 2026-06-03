@@ -15,8 +15,11 @@ router.post("/staffRegister", registerStaff);
 // GET /api/staff?role=admin
 router.get("/", getAllStaff);
 
+
+
 // GET /api/staff/:staffId?fields=name,surname,role
 router.get("/:staffId", getStaffById);
 
 // PATCH /api/staff/:id — admin only
 router.patch("/:id", authUser, isAdmin, updateStaff);
+
