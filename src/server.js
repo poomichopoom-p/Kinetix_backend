@@ -15,6 +15,9 @@ const corsOption = {
     "http://localhost:5175",
   ],
 };
+
+// TODO: remove before production
+// const corsOption = { origin: "*" };
 const app = express();
 const PORT = process.env.PORT || 5000;
 

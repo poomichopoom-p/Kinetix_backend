@@ -30,6 +30,8 @@ const orderSchema = new mongoose.Schema({
   suspended_at: { type: Date },
   rental_stat_at: { type: Date },
   canceled_at: { type: Date },
+  // soft delete flag — false means the order is deactivated, not physically removed
+  is_active: { type: Boolean, default: true },
 });
 
 export const Orders = mongoose.model("order", orderSchema);
