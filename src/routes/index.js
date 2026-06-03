@@ -3,7 +3,11 @@ import { router as usersRouter } from "./user.router/users.routes.js";
 import { router as productsRouter } from "./product.router/product.router.js";
 import { router as staffRouter } from "./staff.router/staff.router.js";
 import { router as orderRouter } from "./order.router/order.router.js";
+<<<<<<< HEAD:src/roues/index.js
 import { router as shoeRouter } from "./shoe.router/shoe.router.js";
+=======
+import { router as shoeRouter } from "../roues/shoe.router/shoe.router.js";
+>>>>>>> poom:src/routes/index.js
 import authUser from "../middelware/authUser.js";
 
 export const router = Router();

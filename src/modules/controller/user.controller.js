@@ -34,22 +34,19 @@ const isValidUserId = (req, res) => {
 };
 
 export const registerUser = async (req, res, next) => {
-  
   const { name, email, password, address } = req.body || {};
 
   const trimName = String(name || "").trim();
-  const trimEmail = String(email || "").trim().toLowerCase();
+  const trimEmail = String(email || "")
+    .trim()
+    .toLowerCase();
 
- 
   if (!trimName || !trimEmail || !password) {
     const err = new Error("name, email, password are required!");
     err.success = false;
 
     err.name = "ValidationError";
 
-  
-
-   
     err.status = 404;
     err.message = "name,surname,email,password,address  are requied!";
 
@@ -59,7 +56,6 @@ export const registerUser = async (req, res, next) => {
   if (!EMAIL_PATTERN.test(trimEmail)) {
     const err = new Error("Invalid email pattern");
 
-   
     err.name = "WrongPattern";
 
     err.status = 400;
@@ -68,14 +64,13 @@ export const registerUser = async (req, res, next) => {
   }
 
   try {
-
     const doc = await User.create({
       name: trimName,
       email: trimEmail,
       password,
       ...(address ? { address } : {}),
     });
-    
+
     const safe = doc.toObject();
     delete safe.password;
 
@@ -85,14 +80,11 @@ export const registerUser = async (req, res, next) => {
       data: sanitizeUser(doc),
     });
   } catch (err) {
-
     err.status = 404;
     err.message = err.message || "Create user failed";
     return next(err);
   }
 };
-
-
 
 export const getUserById = async (req, res, next) => {
   try {
@@ -114,6 +106,24 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ success: false, message: " worng password!! " });
+    }
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRETKEY, {
+      expiresIn: "2h",
+    });
+    const isprod = process.env.NODE_ENV === "production";
+
+    res.cookie("accessToken", token, {
+      httpOnly: true,
+      secure: isprod,
+      path: "/",
+      maxAge: 120 * 120 * 2000,
+    });
     return res.status(200).json({
       success: true,
       data: sanitizeUser(user),

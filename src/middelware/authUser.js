@@ -11,7 +11,7 @@ const authUser = async (req, res, next) => {
 
   try {
     const decodeToken = jwt.verify(token, process.env.JWT_SECRETKEY);
-    if (!decodeToken) {
+    if (decodeToken) {
       req.user = { _id: decodeToken.userId };
       next();
     }
@@ -26,6 +26,10 @@ const authUser = async (req, res, next) => {
   }
 };
 
+<<<<<<< HEAD
 
 export default authUser;
 
+=======
+export default authUser;
+>>>>>>> poom
