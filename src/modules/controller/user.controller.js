@@ -35,7 +35,8 @@ export const registerUser = async (req, res, next) => {
       password,
       ...(address ? { address } : {}),
     });
-    console.log(address);
+    
+  
     const safe = doc.toObject();
     delete safe.password;
 
@@ -48,6 +49,37 @@ export const registerUser = async (req, res, next) => {
     err.message = "created fail !";
     res.status(400).json({ success: false, message: "error!", error: err });
     return next(error);
+  }
+};
+
+export const login = async (req, res, next) => {
+  const { email, password } = req.body || "";
+  const userEmail = String(email || "")
+    .trim()
+    .toLowerCase();
+
+  if (!userEmail || !password) {
+    return res
+      .status(400)
+      .json({ success: false, message: "email or password not correct !" });
+  }
+  try {
+    if (!isValidUserId(req, res)) return;
+
+    if (!isOwner(req)) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only access your own user data",
+      });
+    }
+
+    const user = await User.findById(req.params.id);
+
+    err.message = "created fail !";
+    res.status(400).json({ success: false, message: "error!", error: err });
+    return next(error);
+  }catch(err){
+    next(err)
   }
 };
 
