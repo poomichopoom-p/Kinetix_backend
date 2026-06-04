@@ -1,6 +1,6 @@
-/*import { Router } from "express";
-import authUser from "../../middleware/authUser.js";
-import authStaff from "../../middleware/authStaff.js";
+import { Router } from "express";
+import authUser from "../../middelware/authUser.js";
+import authStaff from "../../middelware/authStaff.js";
 import {
   createNewBrand,
   createProduct,
@@ -13,31 +13,9 @@ import { getShoeById } from "../../modules/controller/shoe.controller.js";
 export const router = Router();
 
 router.get("/", getProduct);
-router.get("/:id", getShoeById);
 router.post("/createProduct", createProduct);
 router.post("/newBrand", createNewBrand);
-
-router.get("/:brand", getBrand)
-
-router.get("/:category", getCategory)*/
-
-import { Router } from "express";
-
-import {
-  createNewBrand,
-  createProduct,
-  getProduct,
-  getBrand,
-  getCategory,
-} from "../../modules/controller/products.controller.js";
-
-export const router = Router();
-
-/*
-GET all products
-*/
-router.get("/", getProduct);
-
+router.get("/:id", getShoeById);
 /*
 GET products by category
 Example:
@@ -55,12 +33,5 @@ router.get("/brand/:brand", getBrand);
 /*
 CREATE product
 */
-router.post("/createProduct", createProduct);
 
-/*
-CREATE brand
-*/
-router.post("/newBrand", createNewBrand);
-router.get("/:brand", getBrand);
 
-router.get("/:category", getCategory);

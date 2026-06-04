@@ -3,9 +3,7 @@ import { faker } from "@faker-js/faker";
 import { connectDB } from "./config/mongoDB.js";
 
 import { User } from "./modules/Model/users-model.js";
-
 import { Staff as staff } from "./modules/Model/staff-model.js";
-
 import { Shoe } from "./modules/Model/Shoe-model.js";
 import { Orders } from "./modules/Model/Orders-model.js";
 import { Brand } from "./modules/Model/Brand-model.js";
@@ -13,40 +11,20 @@ import { Products } from "./modules/Model/products-model.js";
 
 // ── helpers ──────────────────────────────────────────────
 const shoeColors = ["Black", "White", "Red", "Navy", "Grey", "Green"];
-const shoeNames = [
-  "Air Max",
-  "Ultra Boost",
-  "Gel-Kayano",
-  "React Infinity",
-  "Fresh Foam",
-  "Pegasus",
-];
-const brandNames = [
-  "Nike",
-  "Adidas",
-  "Asics",
-  "New Balance",
-  "Brooks",
-  "Saucony",
-];
+const shoeNames  = ["Air Max", "Ultra Boost", "Gel-Kayano", "React Infinity", "Fresh Foam", "Pegasus"];
+const brandNames = ["Nike", "Adidas", "Asics", "New Balance", "Brooks", "Saucony"];
 
 // ── seed functions ────────────────────────────────────────
 
 async function seedUsers() {
   await User.deleteMany({});
   const users = Array.from({ length: 5 }, () => ({
-    name: faker.person.firstName(),
-    surname: faker.person.lastName(),
-    email: faker.internet.email().toLowerCase(),
+    name:     faker.person.firstName(),
+    surname:  faker.person.lastName(),
+    email:    faker.internet.email().toLowerCase(),
     password: "password123",
-    address: faker.location.streetAddress({ useFullAddress: true }),
-    userRank: faker.helpers.arrayElement([
-      "bronze",
-      "gold",
-      "silver",
-      "platinum",
-      "Diamond",
-    ]),
+    address:  faker.location.streetAddress({ useFullAddress: true }),
+    userRank: faker.helpers.arrayElement(["bronze", "gold", "silver", "platinum", "Diamond"]),
   }));
   const created = await User.insertMany(users);
   console.log(`✅ Users:   ${created.length} documents`);
@@ -58,13 +36,13 @@ async function seedStaff() {
   const members = [
     // fixed admin account — use this to test admin-only APIs
     {
-      name: "Super",
+      name:    "Super",
       surname: "Admin",
-      email: "admin@kinetix.com",
-      role: "admin",
+      email:   "admin@kinetix.com",
+      role:    "admin",
     },
     ...Array.from({ length: 4 }, () => ({
-      name: faker.person.firstName(),
+      name:    faker.person.firstName(),
       surname: faker.person.lastName(),
       email: faker.internet.email().toLowerCase(),
       role: "staff",
@@ -77,10 +55,7 @@ async function seedStaff() {
 
 async function seedBrands() {
   await Brand.deleteMany({});
-  const brands = brandNames.map((name) => ({
-    brandName: name,
-    isActive: true,
-  }));
+  const brands = brandNames.map((name) => ({ brandName: name, isActive: true }));
   const created = await Brand.insertMany(brands);
   console.log(`✅ Brands:  ${created.length} documents`);
   return created;
@@ -89,12 +64,12 @@ async function seedBrands() {
 async function seedShoes() {
   await Shoe.deleteMany({});
   const shoes = Array.from({ length: 10 }, () => ({
-    name: faker.helpers.arrayElement(shoeNames),
-    brand: faker.helpers.arrayElement(brandNames),
-    size: faker.helpers.arrayElement([38, 39, 40, 41, 42, 43, 44, 45]),
-    color: faker.helpers.arrayElement(shoeColors),
-    price: faker.number.int({ min: 500, max: 5000 }),
-    stock: faker.number.int({ min: 0, max: 50 }),
+    name:      faker.helpers.arrayElement(shoeNames),
+    brand:     faker.helpers.arrayElement(brandNames),
+    size:      faker.helpers.arrayElement([38, 39, 40, 41, 42, 43, 44, 45]),
+    color:     faker.helpers.arrayElement(shoeColors),
+    price:     faker.number.int({ min: 500, max: 5000 }),
+    stock:     faker.number.int({ min: 0, max: 50 }),
     is_active: true,
   }));
   const created = await Shoe.insertMany(shoes);
@@ -105,7 +80,7 @@ async function seedShoes() {
 async function seedProducts(brands) {
   await Products.deleteMany({});
   const products = Array.from({ length: 6 }, () => ({
-    modleName: `${faker.helpers.arrayElement(shoeNames)} ${faker.number.int({ min: 1, max: 9 })}`,
+    modleName:   `${faker.helpers.arrayElement(shoeNames)} ${faker.number.int({ min: 1, max: 9 })}`,
     description: faker.commerce.productDescription(),
     brandId: faker.helpers.arrayElement(brands)._id,
     gender: faker.helpers.arrayElement(["men", "women", "unisex"]),

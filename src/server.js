@@ -1,20 +1,23 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import { router as apiRouter } from "./routes/index.js";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./config/mongoDB.js";
 import { limiter } from "./middleware/rateLimit.js";
+import { globalErrorHandler } from "./middelware/errorHandler.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const corsOption = {
   origin: [
     "https://kinetix-qnx5.onrender.com",
     "http://localhost:5173",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
     "http://localhost:5174",
-    "http://localhost:5175",
+    "http://localhost:5175"
   ],
   credentials: true
 };
@@ -29,14 +32,6 @@ app.use(cors(corsOption));
 app.use(express.json());
 app.use(limiter);
 
-
-app.get("/", (req, res) => {
-  res.send("Welcome to Kinetix");
-});
-// http//localhost:5000/api
-app.use("/api", apiRouter);
-
-// Error handler should be registered after routes
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({
@@ -48,6 +43,12 @@ app.use((err, req, res, next) => {
     stack: err.stack,
   });
 });
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.get("/", (req, res) => {
+  res.send("Welcome to Kinetix");
+});
+// http//localhost:5000/api
+app.use("/api", apiRouter);
 
 await connectDB();
 
