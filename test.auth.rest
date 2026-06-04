@@ -1,0 +1,57 @@
+### ============ REGISTRATION TESTS ============
+
+### Register New User
+POST http://localhost:5000/api/users/register
+Content-Type: application/json
+
+{
+    "name": "John Wick",
+    "email": "johnwick4@example.com",
+    "password": "Wick00009",
+    "address": "123 Continental Hotel, New York"
+}
+
+###
+
+### ============ LOGIN TESTS ============
+
+### Login with Correct Credentials
+POST http://localhost:5000/api/users/login
+Content-Type: application/json
+
+{
+    "email": "johnwick@example.com",
+    "password": "Wick00009"
+}
+
+###
+
+### Login with Wrong Password
+POST http://localhost:5000/api/users/login
+Content-Type: application/json
+
+{
+    "email": "johnwick@example.com",
+    "password": "WrongPassword"
+}
+
+###
+
+### Login with Non-Existent User
+POST http://localhost:5000/api/users/login
+Content-Type: application/json
+
+{
+    "email": "nobody@example.com",
+    "password": "Whatever123"
+}
+
+###
+
+### Login with Missing Fields
+POST http://localhost:5000/api/users/login
+Content-Type: application/json
+
+{
+    "email": "johnwick@example.com"
+}

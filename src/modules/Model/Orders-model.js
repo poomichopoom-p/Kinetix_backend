@@ -1,6 +1,24 @@
 import mongoose from "mongoose";
 
-import { rentalSchema } from "./products-model.js";
+const rentalSchema = new mongoose.Schema(
+  {
+    "1day": {
+      type: Number,
+      required: true,
+    },
+
+    "3day": {
+      type: Number,
+      required: true,
+    },
+
+    "7day": {
+      type: Number,
+      required: true,
+    },
+  },
+  { _id: false }
+);
 
 const OrdersItem = new mongoose.Schema({
   ProductId: {

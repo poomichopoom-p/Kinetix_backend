@@ -1,5 +1,5 @@
 import { Router } from "express";
-import authUser from "../../middelware/authUser.js";
+import authUser from "../../middleware/authUser.js";
 import {
   deleteUserById,
   getUserById,
