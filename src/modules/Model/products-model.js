@@ -27,7 +27,7 @@ export const rentalSchema = new mongoose.Schema({
 });
 const ProductsSchema = new mongoose.Schema(
   {
-    name: { type: String, minlength: 5, trim: true, required: true },
+    modelName: { type: String, required: true, minlength: 5 },
     description: { type: String },
     brandId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -35,8 +35,9 @@ const ProductsSchema = new mongoose.Schema(
       required: true,
     },
     gender: {
-      enum: ["men", "women", "unisex"]
-      
+      type: String,
+      required: true,
+      enum: ["men", "women", "unisex"],
     },
     category: {
       type: String,
@@ -46,7 +47,7 @@ const ProductsSchema = new mongoose.Schema(
     rentalPlan: [rentalSchema],
     variants: [variantSchema],
     isActive: { type: Boolean, default: true },
-    createdAt: { type: Date, default: Date.now, select: false },
+    createdAt: { type: Date, default: Date.now ,select:false},
   },
   { timestamps: true },
 );

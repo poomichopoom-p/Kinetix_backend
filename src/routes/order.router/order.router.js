@@ -5,8 +5,8 @@ import {
   newOrder,
   deleteOrder,
 } from "../../modules/controller/orders.controller.js";
-import authUser from "../../middelware/authUser.js";
-import isAdmin from "../../middelware/isAdmin.js";
+import authUser from "../../middleware/authUser.js";
+import isAdmin from "../../middleware/isAdmin.js";
 
 export const router = Router();
 // get all order

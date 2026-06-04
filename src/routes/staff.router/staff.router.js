@@ -1,5 +1,5 @@
 import { Router } from "express";
-
+import { registerStaff } from "../../modules/controller/staff.controller.js";
 import authUser from "../../middelware/authUser.js";
 import isAdmin from "../../middelware/isAdmin.js";
 import {
@@ -11,6 +11,7 @@ import {
 
 export const router = Router();
 
+router.post("/staffRegister", registerStaff);
 // GET /api/staff?role=admin
 router.get("/", getAllStaff);
 

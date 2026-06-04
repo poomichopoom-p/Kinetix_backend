@@ -13,7 +13,7 @@ export const getProduct = async (req, res, next) => {
     }
     return res.status(200).json({
       success: true,
-      message: "Get Product Done!!",
+      message: "Products fetched successfully",
       data: doc,
     });
   } catch (err) {
@@ -22,34 +22,44 @@ export const getProduct = async (req, res, next) => {
 };
 
 export const createProduct = async (req, res, next) => {
-  const { name, description, brandId, category, rentalPlan, variants } =
-    req.body || "";
+  const {
+    modelName,
+    description,
+    brandId,
+    gender,
+    category,
+    rentalPlan,
+    variants,
+  } = req.body || {};
 
-  // console.log({
-  //   modelName,
-  //   description,
-  //   brandId,
-  //   category,
-  //   rentalPlan,
-  //   variants,
-  // });
-  if (!name || !variants || !brandId || !category || !rentalPlan) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Incomplete information." });
+  if (
+    !modelName ||
+    !brandId ||
+    !gender ||
+    !category ||
+    !rentalPlan ||
+    !variants
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Incomplete information.",
+    });
   }
+
 
   try {
     const doc = await Products.create({
-      name: name,
-      variants: variants,
-      brandId: brandId,
-      category: category,
-      rentalPlan: rentalPlan,
+      modelName,
+      description,
+      brandId,
+      gender,
+      category,
+      rentalPlan,
+      variants,
     });
     return res
       .status(201)
-      .json({ success: true, message: "Create successful!", data: doc });
+      .json({ success: true, message: "Product created successfully!", data: doc });
   } catch (err) {
     next(err);
   }
@@ -59,9 +69,8 @@ export const createNewBrand = async (req, res, next) => {
   const { brandName, model } = req.body || {};
   const brand = String(brandName || "").trim();
 
-  console.log(brand);
   if (!brand) {
-    return res.status(404).json({
+    return res.status(400).json({
       success: false,
       message: "Brand name is required!",
     });
@@ -75,7 +84,30 @@ export const createNewBrand = async (req, res, next) => {
 
     return res.status(201).json({
       success: true,
-      message: "Brand created successfully!",
+      message: "Brand created successfully",
+      data: doc,
+    });
+  } catch (err) {
+    // Check for duplicate key error (MongoDB error code 11000)
+    if (err.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: `Brand with name '${brand}' already exists.`,
+      });
+    }
+    next(err); // Pass other errors to the next middleware
+  }
+};
+
+export const getBrand = async (req, res, next) => {
+  const { brand } = req.params;
+
+  try {
+    const doc = await Brand.find({ brandName: brand });
+
+    return res.status(200).json({
+      success: true,
+      message: "found!",
       data: doc,
     });
   } catch (err) {
@@ -83,33 +115,17 @@ export const createNewBrand = async (req, res, next) => {
   }
 };
 
-export const getBrand = async (req, res, next) => {
-  const { brand } = req.body || "";
-  if (!brand) {
-    res.status(400).json({ success: false, message: "brand not found!" });
-  }
-
-  try {
-    const doc = await Brand.find(brand);
-    return res
-      .status(200)
-      .json({ success: true, message: "founded!", data: doc });
-  } catch (err) {
-    next(err);
-  }
-};
-
 export const getCategory = async (req, res, next) => {
-  const { category } = req.body || "";
-  if (!category) {
-    res.status(400).json({ success: false, message: "category not found!" });
-  }
+  const { category } = req.params;
 
   try {
-    const doc = await Products.find(category);
-    return res
-      .status(200)
-      .json({ success: true, message: "founded!", data: doc });
+    const doc = await Products.find({ category });
+
+    return res.status(200).json({
+      success: true,
+      message: "found!",
+      data: doc,
+    });
   } catch (err) {
     next(err);
   }

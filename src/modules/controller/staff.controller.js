@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { Staff } from "../Model/staff-model.js";
 
@@ -136,7 +137,3 @@ export const registerStaff = async (req, res, next) => {
     return next(err);
   }
 };
-
-
-
-
