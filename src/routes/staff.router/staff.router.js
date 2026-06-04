@@ -1,7 +1,6 @@
 import { Router } from "express";
-import { registerStaff } from "../../modules/controller/staff.controller.js";
-import authUser from "../../middelware/authUser.js";
-import isAdmin from "../../middelware/isAdmin.js";
+import authUser from "../../middleware/authUser.js";
+import isAdmin from "../../middleware/isAdmin.js";
 import {
   getAllStaff,
   getStaffById,

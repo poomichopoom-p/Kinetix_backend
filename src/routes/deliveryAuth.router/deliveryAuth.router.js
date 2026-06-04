@@ -1,5 +1,5 @@
 import { Router } from "express";
-import deliveryAuth from "../../middelware/deliveryAuth.js";
+import deliveryAuth from "../../middleware/deliveryAuth.js";
 import { register, login, getMe } from "../../modules/controller/deliveryAuth.controller.js";
 
 export const router = Router();

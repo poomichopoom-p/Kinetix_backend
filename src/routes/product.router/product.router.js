@@ -1,6 +1,6 @@
 import { Router } from "express";
-import authUser from "../../middelware/authUser.js";
-import authStaff from "../../middelware/authStaff.js";
+import authUser from "../../middleware/authUser.js";
+import authStaff from "../../middleware/authStaff.js";
 import {
   createNewBrand,
   createProduct,
