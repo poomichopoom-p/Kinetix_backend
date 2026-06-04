@@ -8,7 +8,7 @@ import { router as apiRouter } from "./routes/index.js";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./config/mongoDB.js";
 import { limiter } from "./middleware/rateLimit.js";
-import { globalErrorHandler } from "./middelware/errorHandler.js";
+import { globalErrorHandler } from "./middleware/errorHandler.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -17,11 +17,10 @@ const corsOption = {
     "https://kinetix-qnx5.onrender.com",
     "http://localhost:5173",
     "http://localhost:5174",
-    "http://localhost:5175"
+    "http://localhost:5175",
   ],
-  credentials: true
+  credentials: true,
 };
-
 
 const app = express();
 const PORT = process.env.PORT || 5000;
