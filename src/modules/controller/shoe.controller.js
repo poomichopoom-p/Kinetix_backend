@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { Shoe } from "../Model/shoue-model.js";
-
+import { Products } from "../Model/products-model.js";
 // GET /api/shoes/:id
 export const getShoeById = async (req, res, next) => {
   const { id } = req.params;
@@ -11,8 +11,8 @@ export const getShoeById = async (req, res, next) => {
   }
 
   try {
-    const shoe = await Shoe.findById(id);
-
+    const shoe = await Products.findById(id);
+    console.log(shoe);
     if (!shoe) {
       return res.status(404).json({ message: "Shoe not found" });
     }
