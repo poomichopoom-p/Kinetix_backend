@@ -1,16 +1,14 @@
 import { Router } from "express";
-import authUser from "../../middelware/authUser.js";
-import authStaff from "../../middelware/authStaff.js";
+import authUser from "../../middleware/authUser.js";
+import authStaff from "../../middleware/authStaff.js";
 import {
   createNewBrand,
   createProduct,
   getProduct,
-} from "../../modules/controller/products.controller.js";
-
-import {
   getBrand,
   getCategory,
 } from "../../modules/controller/products.controller.js";
+import { getShoeById } from "../../modules/controller/shoe.controller.js";
 
 export const router = Router();
 
@@ -20,5 +18,4 @@ router.post("/newBrand", createNewBrand);
 
 router.get("/brand/:brand", getBrand);
 router.get("/category/:category", getCategory);
-
-
+router.get("/:id", getShoeById);

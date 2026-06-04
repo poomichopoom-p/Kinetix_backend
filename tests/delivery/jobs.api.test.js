@@ -74,9 +74,9 @@ const fs = require("fs");
 
 process.env.JWT_SECRETKEY = "test-secret";
 
-const { router: jobRouter }  = require("../../src/roues/job.router/job.router.js");
-const { router: authRouter } = require("../../src/roues/deliveryAuth.router/deliveryAuth.router.js");
-const { globalErrorHandler } = require("../../src/middelware/errorHandler.js");
+const { router: jobRouter }  = require("../../src/routes/job.router/job.router.js");
+const { router: authRouter } = require("../../src/routes/deliveryAuth.router/deliveryAuth.router.js");
+const { globalErrorHandler } = require("../../src/middleware/errorHandler.js");
 
 const app = express();
 app.use(express.json());

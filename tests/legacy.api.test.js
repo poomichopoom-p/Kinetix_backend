@@ -60,7 +60,7 @@ const jwt = require("jsonwebtoken");
 process.env.JWT_SECRETKEY = "test-secret";
 
 const { router: apiRouter } = require("../src/routes/index.js");
-const { globalErrorHandler } = require("../src/middelware/errorHandler.js");
+const { globalErrorHandler } = require("../src/middleware/errorHandler.js");
 
 const app = express();
 app.use(cookieParser());
@@ -86,6 +86,7 @@ describe("Legacy routes smoke coverage", () => {
         toObject: () => ({
           _id: FAKE_ID,
           name: "Tester",
+          surname: "User",
           email: "tester@test.com",
           password: "hashed",
         }),
@@ -93,7 +94,13 @@ describe("Legacy routes smoke coverage", () => {
 
       const res = await request(app)
         .post("/api/users/register")
-        .send({ name: "Tester", email: "tester@test.com", password: "12345678" });
+        .send({
+          name: "Tester",
+          surname: "User",
+          email: "tester@test.com",
+          password: "12345678",
+          address: "123 Test Street",
+        });
 
       expect(res.status).toBe(201);
       expect(res.body.data.password).toBeUndefined();
@@ -102,7 +109,13 @@ describe("Legacy routes smoke coverage", () => {
     it("POST /api/users/register returns 400 for invalid email", async () => {
       const res = await request(app)
         .post("/api/users/register")
-        .send({ name: "Tester", email: "bad-email", password: "12345678" });
+        .send({
+          name: "Tester",
+          surname: "User",
+          email: "bad-email",
+          password: "12345678",
+          address: "123 Test Street",
+        });
 
       expect(res.status).toBe(400);
     });
@@ -189,8 +202,9 @@ describe("Legacy routes smoke coverage", () => {
       const res = await request(app)
         .post("/api/products/createProduct")
         .send({
-          name: "Runner",
+          modelName: "Runner",
           brandId: FAKE_ID,
+          gender: "unisex",
           category: "Road",
           rentalPlan: [{ "1day": 100, "3day": 250, "7day": 500 }],
           variants: [{ skuColorCode: "RED", colorName: "Red", size: [{ size: 42, stock: 3 }] }],
@@ -199,12 +213,12 @@ describe("Legacy routes smoke coverage", () => {
       expect(res.status).toBe(201);
     });
 
-    it("POST /api/products/createProduct returns 404 for incomplete payload", async () => {
+    it("POST /api/products/createProduct returns 400 for incomplete payload", async () => {
       const res = await request(app)
         .post("/api/products/createProduct")
         .send({ name: "Runner" });
 
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(400);
     });
 
     it("POST /api/products/newBrand returns 201", async () => {
@@ -238,9 +252,9 @@ describe("Legacy routes smoke coverage", () => {
       expect(Products.find).toHaveBeenCalledWith({ category: "Road" });
     });
 
-    it("GET /api/products/:legacyDynamicPath no longer matches ambiguous product routes", async () => {
+    it("GET /api/products/:legacyDynamicPath falls through to shoe id validation", async () => {
       const res = await request(app).get("/api/products/Road");
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(400);
     });
   });
 

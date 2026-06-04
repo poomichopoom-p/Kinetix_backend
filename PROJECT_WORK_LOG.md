@@ -59,3 +59,19 @@
   - ถ้า frontend เรียก product dynamic route เก่า ต้องอัปเดตเป็น `/api/products/brand/:brand` หรือ `/api/products/category/:category`
 * ขั้นต่อไป
   - รัน full live regression เพิ่มถ้าต้องการยืนยันทุก state transition กับ DB จริง
+
+### Server Restart Verification After Merge
+
+* สิ่งที่ทำ
+  - แก้ syntax error จาก duplicate `getBrand` ใน `src/modules/controller/products.controller.js`
+  - ตรวจ route order ใน `src/routes/product.router/product.router.js` ให้ product brand/category ไม่ถูก `/:id` shadow
+  - ปรับ `tests/legacy.api.test.js` ให้ตรง request shape ปัจจุบันหลัง merge
+  - อัปเดต `API_TEST_REPORT/API_TEST_REPORT.md`
+* ผลลัพธ์
+  - `node --check` ผ่านสำหรับไฟล์ที่แก้
+  - `npm.cmd test` ผ่านทั้งหมด 4 suites / 117 tests
+  - live server boot ได้ และ `GET http://localhost:5000/` ได้ 200 `Welcome to Kinetix`
+* ปัญหา
+  - working tree ยังมี merge changes จากทีมหลายไฟล์ ต้องระวังตอน stage/commit แยก scope
+* ขั้นต่อไป
+  - ให้ทีม review merge changes รวมก่อน commit/push ถ้ายังอยู่ในสถานะ pull/merge

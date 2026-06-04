@@ -41,6 +41,11 @@ const isValidUserId = (req, res) => {
   return false;
 };
 
+
+
+
+
+
 export const login = async (req, res, next) => {
   const { email, password } = req.body || "";
   const userEmail = String(email || "")
@@ -94,38 +99,34 @@ export const login = async (req, res, next) => {
 };
 
 export const registerUser = async (req, res, next) => {
-  const { name, email, password, address } = req.body || {};
-
+  const { name, surname, email, password, address } = req.body || "";
   const trimName = String(name || "").trim();
+  const trimSurname = String(surname || "").trim();
   const trimEmail = String(email || "")
     .trim()
     .toLowerCase();
 
-  if (!trimName || !trimEmail || !password) {
-    const err = new Error("name, email, password are required!");
+  if (!trimName || !trimSurname || !trimEmail || !password) {
+    const err = new Error("name, surname, email, password, address are required!");
     err.success = false;
-
-    err.name = "ValidationError";
-
+    err.name = "VaridationError";
     err.status = 404;
     err.message = "name,surname,email,password,address  are requied!";
-
     return next(err);
   }
-
   if (!EMAIL_PATTERN.test(trimEmail)) {
-    const err = new Error("Invalid email pattern");
-
-    err.name = "WrongPattern";
-
+    const err = new Error("user");
+    err.name = "WorngPattern";
     err.status = 400;
-    err.message = "Invalid email format";
+    err.message = "your write wrong Pattern";
     return next(err);
+    // res.status(400).json({success:false,message:"worng pattern"})
   }
 
   try {
     const doc = await User.create({
       name: trimName,
+      surname: trimSurname,
       email: trimEmail,
       password,
       ...(address ? { address } : {}),

@@ -1,7 +1,7 @@
 import { Router } from "express";
-import deliveryAuth from "../../middelware/deliveryAuth.js";
-import { requireRole } from "../../middelware/rbac.js";
-import { upload } from "../../middelware/upload.js";
+import deliveryAuth from "../../middleware/deliveryAuth.js";
+import { requireRole } from "../../middleware/rbac.js";
+import { upload } from "../../middleware/upload.js";
 import {
   createJob,
   getJobs,

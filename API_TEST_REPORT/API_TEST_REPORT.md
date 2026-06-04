@@ -281,7 +281,7 @@ Live cases ที่ไม่ผ่าน:
 | `/api/staff/:staffId` | GET | staff ไม่พบ | 404 | 404 | PASS |
 | `/api/products/brand/:brand` | GET | route ใหม่สำหรับ brand | 200 | 200 | PASS |
 | `/api/products/category/:category` | GET | route ใหม่สำหรับ category | 200 | 200 | PASS |
-| `/api/products/:legacyDynamicPath` | GET | route เก่าที่ ambiguous | 404 | 404 | PASS |
+| `/api/products/:legacyDynamicPath` | GET | route เก่าที่ ambiguous ตกไปที่ shoe id validation | 400 | 400 | PASS |
 
 Fix summary:
 
@@ -296,8 +296,27 @@ Breaking change note:
 - route เก่า `/api/products/:brand` และ `/api/products/:category` ถูกแทนด้วย `/api/products/brand/:brand` และ `/api/products/category/:category`
 - ถ้า frontend ยังเรียก path เก่า ต้องอัปเดต frontend route ให้ตรง path ใหม่
 
+## Server Restart Verification After Merge
+
+แก้ syntax error จาก merge conflict ที่ทำให้ server restart ไม่ได้:
+
+- Root cause: `src/modules/controller/products.controller.js` มี `export const getBrand` ซ้ำ
+- Fix: ลบ duplicate declaration และคง `getBrand` สำหรับ `/api/products/brand/:brand`
+- Fix: จัด route order ใน `src/routes/product.router/product.router.js` ให้ `/brand/:brand` และ `/category/:category` อยู่ก่อน `/:id`
+- Test update: ปรับ `tests/legacy.api.test.js` ให้ตรง request shape ปัจจุบันของ user/product API
+
+Verification:
+
+- `node --check src/modules/controller/products.controller.js`: PASS
+- `node --check src/routes/product.router/product.router.js`: PASS
+- `node --check src/modules/controller/staff.controller.js`: PASS
+- `node --check tests/legacy.api.test.js`: PASS
+- `npm.cmd test`: PASS, 4 suites / 117 tests
+- Live boot check: PASS, `GET http://localhost:5000/` ได้ `200 Welcome to Kinetix`
+
 ## Final Status
 
 Automated Test: PASS
 Legacy Live Re-Test: PASS
+Server Restart Verification: PASS
 Overall Status: PASS สำหรับ bugfix scope รอบนี้

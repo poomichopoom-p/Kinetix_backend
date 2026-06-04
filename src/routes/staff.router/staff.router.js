@@ -1,7 +1,6 @@
 import { Router } from "express";
-
-import authUser from "../../middelware/authUser.js";
-import isAdmin from "../../middelware/isAdmin.js";
+import authUser from "../../middleware/authUser.js";
+import isAdmin from "../../middleware/isAdmin.js";
 import {
   getAllStaff,
   getStaffById,
@@ -11,6 +10,7 @@ import {
 
 export const router = Router();
 
+router.post("/staffRegister", registerStaff);
 // GET /api/staff?role=admin
 router.get("/", getAllStaff);
 
