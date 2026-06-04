@@ -33,7 +33,7 @@ Content-Type: application/json
   "surname": "Tester",
   "email": "manual-user@test.com",
   "password": "12345678",
-  "address": "Bangkok"
+  "address": "Bangkok Test Address"
 }
 
 ### Users - login

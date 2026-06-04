@@ -86,6 +86,7 @@ Welcome to Kinetix
 หมายเหตุ:
 
 - บาง request ต้องใส่ id จริงก่อน เช่น `@shoeId`, `@legacyStaffId`, `@legacyOrderId`
+- Legacy user register ต้องใช้ `address` อย่างน้อย 10 ตัวอักษร
 - `POST /api/order/create-order` ตอนนี้คาดหวัง `501` เมื่อ auth ผ่าน เพราะยังไม่ implement
 - `GET /api/products/{{categoryName}}` ตั้งใจไว้เช็ค legacy ambiguous path และอาจได้ `400`
 - upload proof ต้องมีไฟล์จริงก่อน ถ้าไม่มีไฟล์ให้ใช้เคส no-file เพื่อคาดหวัง `400`
