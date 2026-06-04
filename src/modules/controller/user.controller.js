@@ -2,49 +2,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../Model/users-model.js";
 import bcrypt from "bcrypt";
 
-
-
-
-
-
-// ถ้าไฟล์นี้อยู่คนละ path ให้ปรับ import เป็น:
-// import { User } from "../../modules/users-model.js";
-
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-
-
-
-const sanitizeUser = (user) => {
-  const userObject = user.toObject();
-
-  // ✅ ห้ามส่ง password กลับไป frontend
-  delete userObject.password;
-
-  return userObject;
-};
-
-const isOwner = (req) => {
-  return req.user?._id?.toString() === req.params.id;
-};
-
-const isValidUserId = (req, res) => {
-  if (/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
-    return true;
-  }
-
-  res.status(400).json({
-    success: false,
-    message: "Invalid user id",
-  });
-
-  return false;
-};
-
-
-
-
-
 
 export const login = async (req, res, next) => {
   const { email, password } = req.body || "";
@@ -244,6 +202,7 @@ export const updateUserById = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+
 };
 
 export const deleteUserById = async (req, res, next) => {
@@ -271,6 +230,35 @@ export const deleteUserById = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Delete user success",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const logout = async (req, res, next) => {
+  try {
+    const token = req.cookies.accessToken;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "No active session found.",
+      });
+    }
+
+    const isProd = process.env.NODE_ENV === "production";
+
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      path: "/",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully!",
     });
   } catch (err) {
     next(err);
