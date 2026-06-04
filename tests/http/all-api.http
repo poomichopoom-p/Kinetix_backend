@@ -1,0 +1,478 @@
+@host = http://localhost:5000
+@baseUrl = {{host}}/api
+
+@legacyUserId = PASTE_LEGACY_USER_ID_HERE
+@legacyStaffId = PASTE_LEGACY_STAFF_ID_HERE
+@legacyOrderId = PASTE_LEGACY_ORDER_ID_HERE
+@shoeId = PASTE_SHOE_ID_HERE
+@brandName = Nike
+@categoryName = Road
+
+@adminToken = PASTE_ADMIN_TOKEN_HERE
+@driverToken = PASTE_DRIVER_TOKEN_HERE
+@userToken = PASTE_USER_TOKEN_HERE
+@deliveryJobId = PASTE_DELIVERY_JOB_ID_HERE
+@returnJobId = PASTE_RETURN_JOB_ID_HERE
+@rejectJobId = PASTE_REJECT_JOB_ID_HERE
+@customerRejectJobId = PASTE_CUSTOMER_REJECT_JOB_ID_HERE
+@cancelJobId = PASTE_CANCEL_JOB_ID_HERE
+
+### Health check
+GET {{host}}/
+
+### ----------------------------------------------------------------------
+### Legacy Users
+### ----------------------------------------------------------------------
+
+### Users - register
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "name": "Manual",
+  "surname": "Tester",
+  "email": "manual-user@test.com",
+  "password": "12345678",
+  "address": "Bangkok"
+}
+
+### Users - login
+# REST Client จะเก็บ cookie จาก response ให้อัตโนมัติ
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "email": "manual-user@test.com",
+  "password": "12345678"
+}
+
+### Users - get by id
+GET {{baseUrl}}/users/{{legacyUserId}}
+
+### Users - update by id
+PATCH {{baseUrl}}/users/{{legacyUserId}}
+Content-Type: application/json
+
+{
+  "name": "Manual Updated"
+}
+
+### Users - delete by id
+DELETE {{baseUrl}}/users/{{legacyUserId}}
+
+### Users - unauthorized example
+GET {{baseUrl}}/users/{{legacyUserId}}
+Cookie: accessToken=
+
+### ----------------------------------------------------------------------
+### Legacy Staff
+### ----------------------------------------------------------------------
+
+### Staff - register
+POST {{baseUrl}}/staff/staffRegister
+Content-Type: application/json
+
+{
+  "name": "Manual",
+  "surname": "Staff",
+  "email": "manual-staff@test.com",
+  "password": "12345678",
+  "role": "staff"
+}
+
+### Staff - list
+GET {{baseUrl}}/staff
+
+### Staff - list by role
+GET {{baseUrl}}/staff?role=staff
+
+### Staff - get by id
+GET {{baseUrl}}/staff/{{legacyStaffId}}
+
+### Staff - get invalid id
+GET {{baseUrl}}/staff/bad-id
+
+### Staff - update by id, admin cookie required
+PATCH {{baseUrl}}/staff/{{legacyStaffId}}
+Content-Type: application/json
+
+{
+  "is_active": true
+}
+
+### ----------------------------------------------------------------------
+### Products and Shoes
+### ----------------------------------------------------------------------
+
+### Products - list
+GET {{baseUrl}}/products
+
+### Products - create brand
+POST {{baseUrl}}/products/newBrand
+Content-Type: application/json
+
+{
+  "brandName": "ManualBrand",
+  "model": "ManualModel"
+}
+
+### Products - create product
+POST {{baseUrl}}/products/createProduct
+Content-Type: application/json
+
+{
+  "modelName": "Manual Runner",
+  "description": "Manual API test product",
+  "brandId": "PASTE_BRAND_ID_HERE",
+  "gender": "unisex",
+  "category": "Road",
+  "rentalPlan": [
+    { "duration": 1, "price": 100 },
+    { "duration": 3, "price": 250 }
+  ],
+  "variants": [
+    {
+      "skuColorCode": "RED",
+      "colorName": "Red",
+      "size": [
+        { "size": 42, "stock": 3 }
+      ]
+    }
+  ]
+}
+
+### Products - get by brand
+GET {{baseUrl}}/products/brand/{{brandName}}
+
+### Products - get by category
+GET {{baseUrl}}/products/category/{{categoryName}}
+
+### Products - legacy ambiguous path, should hit shoe id validation
+GET {{baseUrl}}/products/{{categoryName}}
+
+### Shoes - get by id
+GET {{baseUrl}}/shoes/{{shoeId}}
+
+### Shoes - invalid id
+GET {{baseUrl}}/shoes/bad-id
+
+### ----------------------------------------------------------------------
+### Legacy Orders
+### ----------------------------------------------------------------------
+
+### Orders - list, legacy cookie required
+GET {{baseUrl}}/order
+
+### Orders - create, currently returns 501 when auth passes
+POST {{baseUrl}}/order/create-order
+Content-Type: application/json
+
+{
+  "status": "Waiting"
+}
+
+### Orders - delete, admin cookie required
+DELETE {{baseUrl}}/order/{{legacyOrderId}}
+
+### Orders - unauthorized example
+GET {{baseUrl}}/order
+Cookie: accessToken=
+
+### ----------------------------------------------------------------------
+### Delivery Auth
+### ----------------------------------------------------------------------
+
+### Delivery Auth - register ADMIN
+POST {{baseUrl}}/delivery-auth/register
+Content-Type: application/json
+
+{
+  "name": "Manual Admin",
+  "email": "manual-admin@test.com",
+  "password": "123456",
+  "role": "ADMIN"
+}
+
+### Delivery Auth - register DRIVER
+POST {{baseUrl}}/delivery-auth/register
+Content-Type: application/json
+
+{
+  "name": "Manual Driver",
+  "email": "manual-driver@test.com",
+  "password": "123456",
+  "role": "DRIVER"
+}
+
+### Delivery Auth - register USER
+POST {{baseUrl}}/delivery-auth/register
+Content-Type: application/json
+
+{
+  "name": "Manual User",
+  "email": "manual-delivery-user@test.com",
+  "password": "123456",
+  "role": "USER"
+}
+
+### Delivery Auth - login ADMIN, copy token to @adminToken
+POST {{baseUrl}}/delivery-auth/login
+Content-Type: application/json
+
+{
+  "email": "manual-admin@test.com",
+  "password": "123456"
+}
+
+### Delivery Auth - login DRIVER, copy token to @driverToken
+POST {{baseUrl}}/delivery-auth/login
+Content-Type: application/json
+
+{
+  "email": "manual-driver@test.com",
+  "password": "123456"
+}
+
+### Delivery Auth - login USER, copy token to @userToken
+POST {{baseUrl}}/delivery-auth/login
+Content-Type: application/json
+
+{
+  "email": "manual-delivery-user@test.com",
+  "password": "123456"
+}
+
+### Delivery Auth - me
+GET {{baseUrl}}/delivery-auth/me
+Authorization: Bearer {{adminToken}}
+
+### Delivery Auth - unauthorized me
+GET {{baseUrl}}/delivery-auth/me
+
+### ----------------------------------------------------------------------
+### Jobs - Common Query and Notifications
+### ----------------------------------------------------------------------
+
+### Jobs - list
+GET {{baseUrl}}/jobs
+Authorization: Bearer {{adminToken}}
+
+### Jobs - list with filters
+GET {{baseUrl}}/jobs?status=IN_TRANSIT&jobType=DELIVERY&page=1&limit=10
+Authorization: Bearer {{adminToken}}
+
+### Jobs - unauthorized list
+GET {{baseUrl}}/jobs
+
+### Jobs - get by id
+GET {{baseUrl}}/jobs/{{deliveryJobId}}
+Authorization: Bearer {{adminToken}}
+
+### Jobs - invalid id
+GET {{baseUrl}}/jobs/bad-id
+Authorization: Bearer {{adminToken}}
+
+### Jobs - timeline
+GET {{baseUrl}}/jobs/{{deliveryJobId}}/timeline
+Authorization: Bearer {{adminToken}}
+
+### Jobs - notifications
+GET {{baseUrl}}/jobs/notifications
+Authorization: Bearer {{userToken}}
+
+### Jobs - mark notifications read
+PATCH {{baseUrl}}/jobs/notifications/read
+Authorization: Bearer {{userToken}}
+
+### Jobs - upload proof, attach a real local file before running
+PATCH {{baseUrl}}/jobs/{{deliveryJobId}}/upload-proof
+Authorization: Bearer {{driverToken}}
+Content-Type: multipart/form-data
+
+proof=@./tests/http/sample-proof.png
+
+### Jobs - upload proof without file, should return 400
+PATCH {{baseUrl}}/jobs/{{deliveryJobId}}/upload-proof
+Authorization: Bearer {{driverToken}}
+
+### ----------------------------------------------------------------------
+### Jobs - Delivery Flow
+### ----------------------------------------------------------------------
+
+### Jobs - create DELIVERY, copy _id to @deliveryJobId
+POST {{baseUrl}}/jobs
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "jobType": "DELIVERY"
+}
+
+### Jobs - create DELIVERY forbidden for DRIVER
+POST {{baseUrl}}/jobs
+Content-Type: application/json
+Authorization: Bearer {{driverToken}}
+
+{
+  "jobType": "DELIVERY"
+}
+
+### Jobs - create missing jobType
+POST {{baseUrl}}/jobs
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{}
+
+### Jobs - create invalid jobType
+POST {{baseUrl}}/jobs
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "jobType": "WRONG_TYPE"
+}
+
+### Jobs - admin confirm
+PATCH {{baseUrl}}/jobs/{{deliveryJobId}}/admin-confirm
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "remark": "Manual approved"
+}
+
+### Jobs - driver confirm
+PATCH {{baseUrl}}/jobs/{{deliveryJobId}}/driver-confirm
+Authorization: Bearer {{driverToken}}
+
+### Jobs - pickup
+PATCH {{baseUrl}}/jobs/{{deliveryJobId}}/pickup
+Authorization: Bearer {{driverToken}}
+
+### Jobs - in transit
+PATCH {{baseUrl}}/jobs/{{deliveryJobId}}/in-transit
+Authorization: Bearer {{driverToken}}
+
+### Jobs - complete
+PATCH {{baseUrl}}/jobs/{{deliveryJobId}}/complete
+Authorization: Bearer {{driverToken}}
+
+### ----------------------------------------------------------------------
+### Jobs - Return Flow
+### ----------------------------------------------------------------------
+
+### Jobs - create RETURN, copy _id to @returnJobId
+POST {{baseUrl}}/jobs
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "jobType": "RETURN"
+}
+
+### Jobs - return approve
+PATCH {{baseUrl}}/jobs/{{returnJobId}}/return-approve
+Authorization: Bearer {{adminToken}}
+
+### Jobs - return driver confirm
+PATCH {{baseUrl}}/jobs/{{returnJobId}}/return-driver-confirm
+Authorization: Bearer {{driverToken}}
+
+### Jobs - return pickup
+PATCH {{baseUrl}}/jobs/{{returnJobId}}/return-pickup
+Authorization: Bearer {{driverToken}}
+
+### Jobs - return in transit
+PATCH {{baseUrl}}/jobs/{{returnJobId}}/return-in-transit
+Authorization: Bearer {{driverToken}}
+
+### Jobs - return complete
+PATCH {{baseUrl}}/jobs/{{returnJobId}}/return-complete
+Authorization: Bearer {{driverToken}}
+
+### ----------------------------------------------------------------------
+### Jobs - Reject Flow
+### ----------------------------------------------------------------------
+
+### Jobs - create reject test job, copy _id to @rejectJobId
+POST {{baseUrl}}/jobs
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "jobType": "DELIVERY"
+}
+
+### Jobs - reject
+PATCH {{baseUrl}}/jobs/{{rejectJobId}}/reject
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "remark": "Manual reject"
+}
+
+### Jobs - reject driver confirm
+PATCH {{baseUrl}}/jobs/{{rejectJobId}}/reject-driver-confirm
+Authorization: Bearer {{driverToken}}
+
+### Jobs - reject approve
+PATCH {{baseUrl}}/jobs/{{rejectJobId}}/reject-approve
+Authorization: Bearer {{adminToken}}
+
+### ----------------------------------------------------------------------
+### Jobs - Customer Reject Flow
+### ----------------------------------------------------------------------
+
+### Jobs - create customer reject test job, copy _id to @customerRejectJobId
+POST {{baseUrl}}/jobs
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "jobType": "DELIVERY"
+}
+
+### Jobs - customer reject
+PATCH {{baseUrl}}/jobs/{{customerRejectJobId}}/customer-reject
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "remark": "Customer rejected manually"
+}
+
+### Jobs - customer reject acknowledge
+PATCH {{baseUrl}}/jobs/{{customerRejectJobId}}/customer-reject-acknowledge
+Authorization: Bearer {{driverToken}}
+
+### Jobs - customer reject complete
+PATCH {{baseUrl}}/jobs/{{customerRejectJobId}}/customer-reject-complete
+Authorization: Bearer {{adminToken}}
+
+### ----------------------------------------------------------------------
+### Jobs - Cancellation Flow
+### ----------------------------------------------------------------------
+
+### Jobs - create cancellation test job, copy _id to @cancelJobId
+POST {{baseUrl}}/jobs
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "jobType": "DELIVERY"
+}
+
+### Jobs - request cancellation
+PATCH {{baseUrl}}/jobs/{{cancelJobId}}/request-cancellation
+Content-Type: application/json
+Authorization: Bearer {{userToken}}
+
+{
+  "remark": "Manual cancellation request"
+}
+
+### Jobs - approve cancellation
+PATCH {{baseUrl}}/jobs/{{cancelJobId}}/approve-cancellation
+Authorization: Bearer {{adminToken}}

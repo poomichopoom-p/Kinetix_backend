@@ -80,12 +80,14 @@
 
 * สิ่งที่ทำ
   - เพิ่มคู่มือ `tests/http/API_MANUAL_TEST_GUIDE.md`
+  - เพิ่มไฟล์ `tests/http/all-api.http` สำหรับยิงทุก route ที่ mount จริง
   - อธิบายวิธีรัน server ด้วย `npm run dev`
-  - อธิบายวิธีกด `Send Request` ในไฟล์ `tests/http/delivery.http`
+  - อธิบายวิธีกด `Send Request` ในไฟล์ `tests/http/delivery.http` และ `tests/http/all-api.http`
   - อธิบายลำดับ register/login, copy token, copy jobId และยิง delivery flow
+  - เพิ่ม request ครบกลุ่ม users, staff, products, order, shoes, delivery-auth และ jobs
   - เพิ่ม checklist และ troubleshooting สำหรับ status 401/403/409/500
 * ผลลัพธ์
-  - ทีมสามารถเปิด `delivery.http` แล้วทดลองยิง API เองได้ตามขั้นตอน
+  - ทีมสามารถเปิด `delivery.http` เพื่อยิง delivery flow หรือเปิด `all-api.http` เพื่อยิงทุกเส้นเองได้ตามขั้นตอน
 * ปัญหา
   - Manual test ต้องใช้ MongoDB จริงจาก `.env` และข้อมูลจริงในเครื่องที่รัน
 * ขั้นต่อไป

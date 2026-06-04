@@ -2,7 +2,12 @@
 
 ## เป้าหมาย
 
-ใช้คู่มือนี้สำหรับทดลองยิง API เองจากไฟล์ `tests/http/delivery.http` โดยไม่ต้องเขียนโค้ดเพิ่ม
+ใช้คู่มือนี้สำหรับทดลองยิง API เองจากไฟล์ HTTP โดยไม่ต้องเขียนโค้ดเพิ่ม
+
+ไฟล์ที่ใช้:
+
+- `tests/http/delivery.http`: สำหรับ delivery/job flow หลัก
+- `tests/http/all-api.http`: สำหรับยิงทุก route ที่ mount จริงใน backend
 
 ## สิ่งที่ต้องมี
 
@@ -39,7 +44,7 @@ Welcome to Kinetix
 
 ## วิธีกดยิง API ใน VS Code
 
-1. เปิดไฟล์ `tests/http/delivery.http`
+1. เปิดไฟล์ `tests/http/delivery.http` หรือ `tests/http/all-api.http`
 2. มองหาปุ่ม `Send Request` ที่อยู่เหนือ request แต่ละอัน
 3. กด `Send Request`
 4. ดู response ที่แถบขวาหรือแท็บ response ของ REST Client
@@ -56,6 +61,34 @@ Welcome to Kinetix
 8. ยิง `Login USER`
 9. copy ค่า `token` จาก response ไปใส่ `@userToken`
 10. ยิง `Get My Profile` เพื่อเช็คว่า token ใช้งานได้
+
+## วิธีเทสทุกเส้น
+
+ใช้ไฟล์ `tests/http/all-api.http`
+
+ลำดับที่แนะนำ:
+
+1. รัน `Health check`
+2. รันกลุ่ม `Legacy Users` เพื่อ register/login และให้ REST Client เก็บ cookie
+3. copy user `_id` จาก response ไปใส่ `@legacyUserId`
+4. รันกลุ่ม `Legacy Staff`
+5. รันกลุ่ม `Products and Shoes`
+6. รันกลุ่ม `Legacy Orders`
+7. รันกลุ่ม `Delivery Auth` แล้ว copy token ไปใส่ `@adminToken`, `@driverToken`, `@userToken`
+8. รันกลุ่ม `Jobs - Common Query and Notifications`
+9. รัน flow งานทีละชุด และ copy `_id` ไปใส่ตัวแปรของ flow นั้น:
+   - `@deliveryJobId`
+   - `@returnJobId`
+   - `@rejectJobId`
+   - `@customerRejectJobId`
+   - `@cancelJobId`
+
+หมายเหตุ:
+
+- บาง request ต้องใส่ id จริงก่อน เช่น `@shoeId`, `@legacyStaffId`, `@legacyOrderId`
+- `POST /api/order/create-order` ตอนนี้คาดหวัง `501` เมื่อ auth ผ่าน เพราะยังไม่ implement
+- `GET /api/products/{{categoryName}}` ตั้งใจไว้เช็ค legacy ambiguous path และอาจได้ `400`
+- upload proof ต้องมีไฟล์จริงก่อน ถ้าไม่มีไฟล์ให้ใช้เคส no-file เพื่อคาดหวัง `400`
 
 ## วิธีสร้าง Job และเทส Flow
 
