@@ -19,7 +19,10 @@ export const getOrder = async (req, res, next) => {
 };
 
 export const newOrder = async (req, res, next) => {
-  const { costomerId, status, rental_plan } = req.body || "";
+  return res.status(501).json({
+    success: false,
+    message: "Create order API is not implemented yet",
+  });
 };
 
 // DELETE /api/order/:id — Soft Delete (sets is_active: false, never removes the document)

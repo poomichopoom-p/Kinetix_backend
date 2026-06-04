@@ -84,13 +84,13 @@ export const createNewBrand = async (req, res, next) => {
 };
 
 export const getBrand = async (req, res, next) => {
-  const { brand } = req.body || "";
+  const { brand } = req.params || {};
   if (!brand) {
-    res.status(400).json({ success: false, message: "brand not found!" });
+    return res.status(400).json({ success: false, message: "brand not found!" });
   }
 
   try {
-    const doc = await Brand.find(brand);
+    const doc = await Brand.find({ brandName: brand });
     return res
       .status(200)
       .json({ success: true, message: "founded!", data: doc });
@@ -100,13 +100,13 @@ export const getBrand = async (req, res, next) => {
 };
 
 export const getCategory = async (req, res, next) => {
-  const { category } = req.body || "";
+  const { category } = req.params || {};
   if (!category) {
-    res.status(400).json({ success: false, message: "category not found!" });
+    return res.status(400).json({ success: false, message: "category not found!" });
   }
 
   try {
-    const doc = await Products.find(category);
+    const doc = await Products.find({ category });
     return res
       .status(200)
       .json({ success: true, message: "founded!", data: doc });
