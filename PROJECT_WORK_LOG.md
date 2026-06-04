@@ -75,3 +75,18 @@
   - working tree ยังมี merge changes จากทีมหลายไฟล์ ต้องระวังตอน stage/commit แยก scope
 * ขั้นต่อไป
   - ให้ทีม review merge changes รวมก่อน commit/push ถ้ายังอยู่ในสถานะ pull/merge
+
+### API Manual Testing Guide
+
+* สิ่งที่ทำ
+  - เพิ่มคู่มือ `tests/http/API_MANUAL_TEST_GUIDE.md`
+  - อธิบายวิธีรัน server ด้วย `npm run dev`
+  - อธิบายวิธีกด `Send Request` ในไฟล์ `tests/http/delivery.http`
+  - อธิบายลำดับ register/login, copy token, copy jobId และยิง delivery flow
+  - เพิ่ม checklist และ troubleshooting สำหรับ status 401/403/409/500
+* ผลลัพธ์
+  - ทีมสามารถเปิด `delivery.http` แล้วทดลองยิง API เองได้ตามขั้นตอน
+* ปัญหา
+  - Manual test ต้องใช้ MongoDB จริงจาก `.env` และข้อมูลจริงในเครื่องที่รัน
+* ขั้นต่อไป
+  - ถ้าพบผลไม่ตรง ให้บันทึก status/response แล้วอัปเดต API test report
