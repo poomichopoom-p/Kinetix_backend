@@ -4,3 +4,5 @@ Test-HTTP/
 src/testHTTP
 .env
 .Ds_store
+backend-5000.log
+live-api-server.*
