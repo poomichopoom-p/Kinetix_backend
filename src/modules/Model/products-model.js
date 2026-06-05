@@ -21,9 +21,15 @@ const variantSchema = new mongoose.Schema({
   size: [sizeSchema],
 });
 export const rentalSchema = new mongoose.Schema({
+<<<<<<< HEAD
   "1day": { type: Number, required: true },
   "3day": { type: Number, required: true },
   "7day": { type: Number, required: true },
+=======
+  "1day": { type: Number, require: true },
+  "3day": { type: Number, require: true },
+  "7day": { type: Number, require: true },
+>>>>>>> 0f5700c7513125fcf24155e0f343c990fd09a5c6
 });
 const ProductsSchema = new mongoose.Schema(
   {
@@ -47,7 +53,7 @@ const ProductsSchema = new mongoose.Schema(
     rentalPlan: [rentalSchema],
     variants: [variantSchema],
     isActive: { type: Boolean, default: true },
-    createdAt: { type: Date, default: Date.now, select: false },
+    createdAt: { type: Date, default: Date.now ,select:false},
   },
   { timestamps: true },
 );

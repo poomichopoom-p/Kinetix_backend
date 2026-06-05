@@ -10,7 +10,7 @@ const shoeSchema = new mongoose.Schema(
     stock: { type: Number, default: 0, min: 0 },
     is_active: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Shoe = mongoose.model("shoe", shoeSchema);

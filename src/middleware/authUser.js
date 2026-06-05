@@ -16,10 +16,13 @@ const authUser = async (req, res, next) => {
       req.user = { _id: decodeToken.userId };
       next();
     }
+
+    req.user = { _id: userId };
+    next();
   } catch (err) {
     return res.status(401).json({
       success: false,
-      message: "Invalid token",
+      message: "Invalid or expired token. please signIn again",
     });
   }
 };

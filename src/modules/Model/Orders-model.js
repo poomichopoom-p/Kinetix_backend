@@ -1,6 +1,24 @@
 import mongoose from "mongoose";
 
-import { rentalSchema } from "./products-model.js";
+const rentalSchema = new mongoose.Schema(
+  {
+    "1day": {
+      type: Number,
+      required: true,
+    },
+
+    "3day": {
+      type: Number,
+      required: true,
+    },
+
+    "7day": {
+      type: Number,
+      required: true,
+    },
+  },
+  { _id: false }
+);
 
 const OrdersItem = new mongoose.Schema({
   ProductId: {
@@ -23,6 +41,8 @@ const orderSchema = new mongoose.Schema({
     default: "Waiting",
   },
   ordered_at: { type: Date, default: Date.now },
+  delivery_shipping_date: { type: Date },
+  delivery_confirm_date: { type: Date },
   delivery_date: { type: Date },
   item: OrdersItem,
   suspended_at: { type: Date },

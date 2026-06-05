@@ -3,7 +3,7 @@ import { faker } from "@faker-js/faker";
 import { connectDB } from "./config/mongoDB.js";
 
 import { User } from "./modules/Model/users-model.js";
-import { staff } from "./modules/Model/staff-model.js";
+import { Staff as staff } from "./modules/Model/staff-model.js";
 import { Shoe } from "./modules/Model/Shoe-model.js";
 import { Orders } from "./modules/Model/Orders-model.js";
 import { Brand } from "./modules/Model/Brand-model.js";
@@ -44,8 +44,8 @@ async function seedStaff() {
     ...Array.from({ length: 4 }, () => ({
       name:    faker.person.firstName(),
       surname: faker.person.lastName(),
-      email:   faker.internet.email().toLowerCase(),
-      role:    "staff",
+      email: faker.internet.email().toLowerCase(),
+      role: "staff",
     })),
   ];
   const created = await staff.insertMany(members);
@@ -82,23 +82,27 @@ async function seedProducts(brands) {
   const products = Array.from({ length: 6 }, () => ({
     modleName:   `${faker.helpers.arrayElement(shoeNames)} ${faker.number.int({ min: 1, max: 9 })}`,
     description: faker.commerce.productDescription(),
-    brandId:     faker.helpers.arrayElement(brands)._id,
-    gender:      faker.helpers.arrayElement(["men", "women", "unisex"]),
-    category:    faker.helpers.arrayElement(["Road", "Trail", "Daily trainer"]),
-    price: [{
-      "1day": faker.number.int({ min: 100, max: 300 }),
-      "3day": faker.number.int({ min: 250, max: 700 }),
-      "7day": faker.number.int({ min: 500, max: 1500 }),
-    }],
-    variants: [{
-      skuColorCode: faker.string.alphanumeric(6).toUpperCase(),
-      colorName:    faker.helpers.arrayElement(shoeColors),
-      images:       faker.image.url(),
-      size: [
-        { size: 42, stock: faker.number.int({ min: 0, max: 20 }) },
-        { size: 43, stock: faker.number.int({ min: 0, max: 20 }) },
-      ],
-    }],
+    brandId: faker.helpers.arrayElement(brands)._id,
+    gender: faker.helpers.arrayElement(["men", "women", "unisex"]),
+    category: faker.helpers.arrayElement(["Road", "Trail", "Daily trainer"]),
+    price: [
+      {
+        "1day": faker.number.int({ min: 100, max: 300 }),
+        "3day": faker.number.int({ min: 250, max: 700 }),
+        "7day": faker.number.int({ min: 500, max: 1500 }),
+      },
+    ],
+    variants: [
+      {
+        skuColorCode: faker.string.alphanumeric(6).toUpperCase(),
+        colorName: faker.helpers.arrayElement(shoeColors),
+        images: faker.image.url(),
+        size: [
+          { size: 42, stock: faker.number.int({ min: 0, max: 20 }) },
+          { size: 43, stock: faker.number.int({ min: 0, max: 20 }) },
+        ],
+      },
+    ],
     isActive: true,
   }));
   const created = await Products.insertMany(products);
@@ -109,13 +113,18 @@ async function seedProducts(brands) {
 async function seedOrders(products) {
   await Orders.deleteMany({});
   const orders = Array.from({ length: 8 }, () => ({
-    status:       faker.helpers.arrayElement(["successful", "Waiting", "Fail", "Done"]),
-    ordered_at:   faker.date.recent({ days: 30 }),
+    status: faker.helpers.arrayElement([
+      "successful",
+      "Waiting",
+      "Fail",
+      "Done",
+    ]),
+    ordered_at: faker.date.recent({ days: 30 }),
     delivery_date: faker.date.soon({ days: 7 }),
-    is_active:    true,
+    is_active: true,
     item: {
-      ProductId:      faker.helpers.arrayElement(products)._id,
-      status:         "Waiting",
+      ProductId: faker.helpers.arrayElement(products)._id,
+      status: "Waiting",
       sku_color_code: faker.string.alphanumeric(6).toUpperCase(),
       deposit_amount: faker.number.int({ min: 500, max: 3000 }),
       rental_plan: {
@@ -136,12 +145,12 @@ async function seed() {
   await connectDB();
   console.log("\n🌱 Seeding database...\n");
 
-  const brands   = await seedBrands();
+  const brands = await seedBrands();
   const products = await seedProducts(brands);
   await seedUsers();
   const staffDocs = await seedStaff();
-  const shoes    = await seedShoes();
-  const orders   = await seedOrders(products);
+  const shoes = await seedShoes();
+  const orders = await seedOrders(products);
 
   // Print IDs for easy copy-paste into Postman
   console.log("\n─────────────────────────────────────────");

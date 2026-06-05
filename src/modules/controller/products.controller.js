@@ -1,14 +1,16 @@
 import { Brand } from "../Model/Brand-model.js";
 import { Products } from "../Model/products-model.js";
 
-/*
-GET ALL PRODUCTS
-*/
 export const getProduct = async (req, res, next) => {
   try {
-    const doc = await Products.find()
-      .populate("brandId");
-
+    const doc = await Products.find();
+    if (!doc) {
+      return res.status(500).json({
+        success: false,
+        message: "server error can't get Product!",
+        error: err,
+      });
+    }
     return res.status(200).json({
       success: true,
       message: "Products fetched successfully",
@@ -19,9 +21,6 @@ export const getProduct = async (req, res, next) => {
   }
 };
 
-/*
-CREATE PRODUCT
-*/
 export const createProduct = async (req, res, next) => {
   const {
     modelName,
@@ -47,6 +46,7 @@ export const createProduct = async (req, res, next) => {
     });
   }
 
+
   try {
     const doc = await Products.create({
       modelName,
@@ -57,29 +57,22 @@ export const createProduct = async (req, res, next) => {
       rentalPlan,
       variants,
     });
-
-    return res.status(201).json({
-      success: true,
-      message: "Product created successfully!",
-      data: doc,
-    });
+    return res
+      .status(201)
+      .json({ success: true, message: "Product created successfully!", data: doc });
   } catch (err) {
     next(err);
   }
 };
 
-/*
-CREATE BRAND
-*/
 export const createNewBrand = async (req, res, next) => {
   const { brandName, model } = req.body || {};
-
   const brand = String(brandName || "").trim();
 
   if (!brand) {
     return res.status(400).json({
       success: false,
-      message: "Brand name is required",
+      message: "Brand name is required!",
     });
   }
 
@@ -106,10 +99,6 @@ export const createNewBrand = async (req, res, next) => {
   }
 };
 
-/*
-GET BRAND
-GET /api/products/brand/Nike
-*/
 export const getBrand = async (req, res, next) => {
   const { brand } = req.params;
 
@@ -126,10 +115,6 @@ export const getBrand = async (req, res, next) => {
   }
 };
 
-/*
-GET PRODUCTS BY CATEGORY
-GET /api/products/category/Road
-*/
 export const getCategory = async (req, res, next) => {
   const { category } = req.params;
 

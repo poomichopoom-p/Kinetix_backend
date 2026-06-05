@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
+<<<<<<< HEAD
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, trim: true, minlength: 3, maxlength: 30 },
@@ -43,6 +44,16 @@ const userSchema = new mongoose.Schema(
       enum: ["bronze", "gold", "silver", "platinum", "Diamond"],
       default: "bronze",
     },
+=======
+const userSchema = new mongoose.Schema({
+  name: { type: String, trim: true, minlength: 3, maxlength: 30 },
+  surname: { type: String, trim: true, minlength: 3, maxlength: 30 },
+  email: {
+    type: String,
+    trim: true,
+    unique: true,
+    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+>>>>>>> 0f5700c7513125fcf24155e0f343c990fd09a5c6
   },
   { timestamps: true },
 );
