@@ -64,7 +64,7 @@ export const addItem = async (req, res, next) => {
     next(err);
   }
 };
-
+// have bug not work
 export const getAdditem = async (req, res, next) => {
   const { _id } = req.params._id || {};
   try {
