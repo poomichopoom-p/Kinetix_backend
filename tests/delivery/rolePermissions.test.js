@@ -1,5 +1,5 @@
 // Unit tests for RBAC middleware
-const { requireRole } = require("../../src/middelware/rbac.js");
+const { requireRole } = require("../../src/middleware/rbac.js");
 
 const makeReq = (role) => ({ user: { role } });
 const makeRes = () => {
@@ -51,7 +51,7 @@ describe("requireRole middleware", () => {
 
 describe("deliveryAuth middleware", () => {
   const jwt = require("jsonwebtoken");
-  const deliveryAuth = require("../../src/middelware/deliveryAuth.js").default;
+  const deliveryAuth = require("../../src/middleware/deliveryAuth.js").default;
 
   const makeAuthReq = (header) => ({ headers: { authorization: header } });
 

@@ -46,7 +46,6 @@ export const createProduct = async (req, res, next) => {
     });
   }
 
-
   try {
     const doc = await Products.create({
       modelName,
@@ -59,7 +58,11 @@ export const createProduct = async (req, res, next) => {
     });
     return res
       .status(201)
-      .json({ success: true, message: "Product created successfully!", data: doc });
+      .json({
+        success: true,
+        message: "Product created successfully!",
+        data: doc,
+      });
   } catch (err) {
     next(err);
   }
@@ -100,32 +103,34 @@ export const createNewBrand = async (req, res, next) => {
 };
 
 export const getBrand = async (req, res, next) => {
-  const { brand } = req.params;
+  const { brand } = req.params || {};
+  if (!brand) {
+    return res
+      .status(400).json({ success: false, message: "brand not found!" });
+  }
 
   try {
     const doc = await Brand.find({ brandName: brand });
-
-    return res.status(200).json({
-      success: true,
-      message: "found!",
-      data: doc,
-    });
+    return res
+      .status(200).json({ success: true, message: "founded!", data: doc });
   } catch (err) {
     next(err);
   }
 };
 
 export const getCategory = async (req, res, next) => {
-  const { category } = req.params;
+  const { category } = req.params || {};
+  if (!category) {
+    return res
+      .status(400)
+      .json({ success: false, message: "category not found!" });
+  }
 
   try {
     const doc = await Products.find({ category });
-
-    return res.status(200).json({
-      success: true,
-      message: "found!",
-      data: doc,
-    });
+    return res
+      .status(200)
+      .json({ success: true, message: "founded!", data: doc });
   } catch (err) {
     next(err);
   }

@@ -15,23 +15,7 @@ export const router = Router();
 router.get("/", getProduct);
 router.post("/createProduct", createProduct);
 router.post("/newBrand", createNewBrand);
-router.get("/:id", getShoeById);
-/*
-GET products by category
-Example:
-GET /api/products/category/Road
-*/
-router.get("/category/:category", getCategory);
 
-/*
-GET brand
-Example:
-GET /api/products/brand/Nike
-*/
 router.get("/brand/:brand", getBrand);
-
-/*
-CREATE product
-*/
-
-
+router.get("/category/:category", getCategory);
+router.get("/:id", getShoeById);

@@ -45,7 +45,7 @@ export const login = async (req, res, next) => {
       .json({ success: false, message: "email or password not correct !" });
   }
   try {
-    const user = await User.findOne({ userEmail }).select("+password");
+    const user = await User.findOne({ email: userEmail }).select("+password");
     if (!user) {
       return res
         .status(404)
@@ -179,24 +179,6 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res
-        .status(400)
-        .json({ success: false, message: " worng password!! " });
-    }
-
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRETKEY, {
-      expiresIn: "2h",
-    });
-    const isprod = process.env.NODE_ENV === "production";
-
-    res.cookie("accessToken", token, {
-      httpOnly: true,
-      secure: isprod,
-      path: "/",
-      maxAge: 120 * 120 * 2000,
-    });
     return res.status(200).json({
       success: true,
       data: sanitizeUser(user),
@@ -274,6 +256,7 @@ export const updateUserById = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+
 };
 
 export const deleteUserById = async (req, res, next) => {
