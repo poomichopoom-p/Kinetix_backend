@@ -2,7 +2,36 @@ import jwt from "jsonwebtoken";
 import { User } from "../Model/users-model.js";
 import bcrypt from "bcrypt";
 
+// ถ้าไฟล์นี้อยู่คนละ path ให้ปรับ import เป็น:
+// import { User } from "../../modules/users-model.js";
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const sanitizeUser = (user) => {
+  const userObject = user.toObject();
+
+  // ✅ ห้ามส่ง password กลับไป frontend
+  delete userObject.password;
+
+  return userObject;
+};
+
+const isOwner = (req) => {
+  return req.user?._id?.toString() === req.params.id;
+};
+
+const isValidUserId = (req, res) => {
+  if (/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
+    return true;
+  }
+
+  res.status(400).json({
+    success: false,
+    message: "Invalid user id",
+  });
+
+  return false;
+};
 
 export const login = async (req, res, next) => {
   const { email, password } = req.body || "";
@@ -65,7 +94,9 @@ export const registerUser = async (req, res, next) => {
     .toLowerCase();
 
   if (!trimName || !trimSurname || !trimEmail || !password) {
-    const err = new Error("name, surname, email, password, address are required!");
+    const err = new Error(
+      "name, surname, email, password, address are required!",
+    );
     err.success = false;
     err.name = "VaridationError";
     err.status = 404;
@@ -102,6 +133,29 @@ export const registerUser = async (req, res, next) => {
     err.status = 404;
     err.message = err.message || "Create user failed";
     return next(err);
+  }
+};
+// poom Fix get user by id
+export const GetById = async (req, res, next) => {
+  const { _id } = req.params || {};
+
+  if (!_id) {
+    return res
+      .status(404)
+      .json({ success: true, message: " User Not Found!", Error: err });
+  }
+  try {
+    const user = await User.findById({ _id }).select("-cart");
+    console.log(user);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: true, message: "ID Not found!", Error: err });
+    }
+
+    return res.status(200).json({ success: true, message: false, data: user });
+  } catch (err) {
+    next(err);
   }
 };
 

@@ -15,9 +15,9 @@ router.post("/staffRegister", registerStaff);
 router.get("/", getAllStaff);
 
 // GET /api/staff/:staffId?fields=name,surname,role
-router.get("/:staffId", getStaffById);
+router.get("/:_staffId", getStaffById);
 
 // PATCH /api/staff/:id — admin only
-router.patch("/:id", authUser, isAdmin, updateStaff);
+router.patch("/:_id", authUser, isAdmin, updateStaff);
 
 
