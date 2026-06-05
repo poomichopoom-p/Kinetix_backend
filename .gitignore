@@ -4,3 +4,4 @@ Test-HTTP/
 src/testHTTP
 .env
 .Ds_store
+.codex/
