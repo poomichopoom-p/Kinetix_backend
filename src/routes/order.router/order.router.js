@@ -22,5 +22,5 @@ router.get("/:id/tracking", getRentalTracking);
 
 router.post("/create-order", authUser, newOrder);
 
-// DELETE /api/order/:id
-router.delete("/:id", authUser, isAdmin, deleteOrder);
+/*DELETE /api/order/:id
+router.delete("/:id", authUser, isAdmin, deleteOrder);*/
