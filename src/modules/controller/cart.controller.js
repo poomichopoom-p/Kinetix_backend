@@ -64,3 +64,26 @@ export const addItem = async (req, res, next) => {
     next(err);
   }
 };
+
+export const getAdditem = async (req, res, next) => {
+  const { _id } = req.params._id || {};
+  try {
+    const cart = await User.findById({ _id }).select("+cart");
+    console.log(cart);
+    if (!cart) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User cart not found !" });
+    }
+    if (cart === []) {
+      return res
+        .status(200)
+        .json({ success: true, message: "No item in cart.", data: cart });
+    }
+    return res
+      .status(200)
+      .json({ success: true, message: "Get item done!", data: cart });
+  } catch (err) {
+    next(err);
+  }
+};
