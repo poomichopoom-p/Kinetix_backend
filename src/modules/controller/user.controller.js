@@ -306,3 +306,32 @@ export const deleteUserById = async (req, res, next) => {
     next(err);
   }
 };
+
+export const logout = async (req, res, next) => {
+  try {
+    const token = req.cookies.accessToken;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "No active session found.",
+      });
+    }
+
+    const isProd = process.env.NODE_ENV === "production";
+
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      path: "/",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully!",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
