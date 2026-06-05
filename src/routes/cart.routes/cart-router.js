@@ -4,4 +4,4 @@ import { addItem } from "../../modules/controller/cart.controller.js";
 
 export const router = Router();
 
-router.post("/addItem", addItem);
+router.post("/addItem/:_id", addItem);
