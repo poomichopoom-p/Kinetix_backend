@@ -6,7 +6,7 @@ export const getOrder = async (req, res, next) => {
     const doc = await Orders.find();
     if (!doc) {
       return res
-        .status(500)
+        .status(404)
         .json({ success: true, message: "Order not found!" });
     }
 
@@ -19,7 +19,34 @@ export const getOrder = async (req, res, next) => {
 };
 
 export const newOrder = async (req, res, next) => {
-  const { costomerId, status, rental_plan } = req.body || "";
+  try {
+    const { items, promoCode } = req.body;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Please add items to your order"
+      });
+    }
+
+    const newOreder = await Orders.create({
+      items: items,
+      status: "waiting",
+      ordered_at: new Date()
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Order created",
+      data: newOrder
+    });
+  } catch (err) {
+    console.log("Error: Create order failed", err);
+    return res.status(500).json({
+      success: false,
+      message: "Cannot create order. Please try again."
+    });
+  }
 };
 
 // DELETE /api/order/:id — Soft Delete (sets is_active: false, never removes the document)

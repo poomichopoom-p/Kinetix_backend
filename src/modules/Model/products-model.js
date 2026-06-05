@@ -96,7 +96,7 @@ const variantSchema = new mongoose.Schema(
   { _id: false }
 );
 
-const rentalSchema = new mongoose.Schema(
+export const rentalSchema = new mongoose.Schema(
   {
     "1day": {
       type: Number,
