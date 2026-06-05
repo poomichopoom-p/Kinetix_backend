@@ -16,7 +16,7 @@ import { router as cartRouter } from "./cart.router/cart.router.js";
 export const router = Router();
 
 router.use("/users", usersRouter);
-router.use("/staff", staffRouter);
+//router.use("/staff", staffRouter);
 router.use("/products", productsRouter);
 router.use("/order", authUser, orderRouter);
 
@@ -24,7 +24,7 @@ router.use("/order", authUser, orderRouter);
 //router.use("/shoes", shoeRouter);
 router.use("/cart", authUser, cartRouter);
 
-router.use("/shoes", shoeRouter);
+//router.use("/shoes", shoeRouter);
 
 // ── Delivery & Return Management ───────────────────────────────────────────────
 //router.use("/delivery-auth", deliveryAuthRouter);

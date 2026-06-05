@@ -1,10 +1,6 @@
 import mongoose from "mongoose";
 import { Shoe } from "../Model/shoue-model.js";
-<<<<<<< HEAD
 import { Products } from "../Model/products-model.js";
-=======
-
->>>>>>> 0f5700c7513125fcf24155e0f343c990fd09a5c6
 // GET /api/shoes/:id
 export const getShoeById = async (req, res, next) => {
   const { id } = req.params;
