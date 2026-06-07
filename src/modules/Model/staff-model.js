@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 const staffSchema = new mongoose.Schema(
   {
@@ -17,13 +18,21 @@ const staffSchema = new mongoose.Schema(
       trim: true,
       select: false,
       minlength: 4,
-      maxlength: 20,
-      match: /^a/,
+      maxlength: 100,
     },
     address: { type: String, minlength: 6, maxlength: 50 },
-    role: { trpe: String, enum: ["staff", "admin"] },
+    role: {
+      trpe: String,
+      enum: ["staff", "admin"],
+      // default: "staff",
+    },
   },
   { timestamps: true },
 );
 
-export const Staff = mongoose.model("Staff", staffSchema, "staffs");
+staffSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+  this.password = await bcrypt.hash(this.password, 12);
+});
+
+export const Staff = mongoose.model("Staff", staffSchema);

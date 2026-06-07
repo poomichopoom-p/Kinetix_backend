@@ -6,6 +6,7 @@ import {
   getStaffById,
   updateStaff,
   registerStaff,
+  staffLogin,
 } from "../../modules/controller/staff.controller.js";
 
 export const router = Router();
@@ -19,5 +20,6 @@ router.get("/:_staffId", getStaffById);
 
 // PATCH /api/staff/:id — admin only
 router.patch("/:_id", authUser, isAdmin, updateStaff);
+router.post("/admin/login",staffLogin)
 
 
