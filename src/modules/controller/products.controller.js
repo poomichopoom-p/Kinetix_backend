@@ -135,3 +135,16 @@ export const getCategory = async (req, res, next) => {
     next(err);
   }
 };
+
+
+export const allBand =async (req,res,next) => {
+  try{
+    const doc = await Brand.find();
+    if(!doc){
+      return res.status(400).json({success:true,message:"some thing worng Product not found!",Error:err})
+    }
+    return res.status(200).json({success:true,message:"Get Done!",data: doc})
+  }catch(err){
+    next(err)
+  }
+}
