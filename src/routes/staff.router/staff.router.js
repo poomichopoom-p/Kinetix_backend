@@ -20,6 +20,6 @@ router.get("/:_staffId", getStaffById);
 
 // PATCH /api/staff/:id — admin only
 router.patch("/:_id", authUser, isAdmin, updateStaff);
-router.post("/admin/login",staffLogin)
+router.post("/admin/login/me",staffLogin)
 
 
