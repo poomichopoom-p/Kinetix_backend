@@ -18,7 +18,7 @@ router.get("/", getAllStaff);
 // GET /api/staff/:staffId?fields=name,surname,role
 router.get("/:_staffId", getStaffById);
 
-// PATCH /api/staff/:id — admin only
+// PATCH /api/staff/:id — admin only http://localhost:5000/api/staff/admin/login
 router.patch("/:_id", authUser, isAdmin, updateStaff);
 router.post("/admin/login",staffLogin)
 
