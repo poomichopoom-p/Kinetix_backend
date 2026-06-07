@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { Staff } from "../Model/staff-model.js";
+import jwt from "jsonwebtoken";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -64,14 +65,10 @@ export const updateStaff = async (req, res, next) => {
   if (is_active !== undefined) updateData.is_active = is_active;
 
   try {
-    const updated = await Staff.findByIdAndUpdate(
-      id,
-      updateData,
-      {
-        new: true,
-        runValidators: true
-      }
-    );
+    const updated = await Staff.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!updated) {
       return res.status(404).json({ message: "Staff not found" });
@@ -88,7 +85,10 @@ export const registerStaff = async (req, res, next) => {
 
   const trimName = String(name || "").trim();
   const trimSurname = String(surname || "").trim();
-  const trimEmail = String(email || "").trim().toLowerCase();
+  const trimEmail = String(email || "")
+    .trim()
+    .toLowerCase();
+  // console.log(trimName, trimEmail, password, trimSurname, address);
 
   if (!trimName || !trimSurname || !trimEmail || !password) {
     const err = new Error("name, surname, email, password are required!");
@@ -110,18 +110,18 @@ export const registerStaff = async (req, res, next) => {
       name: trimName,
       surname: trimSurname,
       email: trimEmail,
-      password,
+      password: password,
       ...(address ? { address } : {}),
-      role: "staff",
+      role: "admin",
     });
 
-    const safe = doc.toObject();
-    delete safe.password;
+    // const safe = doc.toObject();
+    // delete safe.password;
 
     return res.status(201).json({
       success: true,
       message: "Staff created successfully!",
-      data: safe,
+      data: doc,
     });
   } catch (err) {
     if (err.code === 11000) {
@@ -132,8 +132,65 @@ export const registerStaff = async (req, res, next) => {
       return next(dupErr);
     }
 
-    err.status = 500;
-    err.message = "Failed to create staff";
+    // err.status = 500;
+    // err.message = "Failed to create staff";
     return next(err);
+  }
+};
+
+export const staffLogin = async (req, res, next) => {
+  const { email, password } = req.body || {};
+  const staffEmail = String(email || "")
+  .trim()
+  .toLowerCase();
+  if (!staffEmail || !password) {
+    return res
+      .status(400)
+      .json({ success: false, message: " Email and Password are required" });
+  }
+  try {
+    const staff = await Staff.findOne({ email: staffEmail }).select("+password");
+    console.log(staff);
+    if (!staff) {
+      return res
+        .status(404)
+        .json({ success: false, meassge: "account not found!" });
+    }
+    const isMatch = await bcrypt.compare(password,staff.password);
+    // console.log(isMatch)
+    if (!isMatch) {
+      return res
+        .status(401)
+        .json({ success: false, message: " worng password!! " });
+    }
+
+    const token = jwt.sign(
+      { staffId: staff._id },
+      process.env.JWT_STAFF_SECRETKEY,
+      {
+        expiresIn: "2h",
+      },
+    );
+    const isprod = process.env.NODE_ENV === "production";
+
+    res.cookie("accessToken", token, {
+      httpOnly: true,
+      secure: isprod,
+      path: "/",
+      maxAge: 120 * 120 * 2000,
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Login success!",
+      staff: {
+        _id: staff._id,
+        email: staff.email,
+        name: staff.name,
+        role: staff.role,
+      },
+    });
+  } catch (err) {
+    // err.name = "server Error"
+    next(err);
   }
 };

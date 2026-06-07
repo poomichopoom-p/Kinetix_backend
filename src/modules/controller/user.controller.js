@@ -2,18 +2,10 @@ import jwt from "jsonwebtoken";
 import { User } from "../Model/users-model.js";
 import bcrypt from "bcrypt";
 
-
-
-
-
-
 // ถ้าไฟล์นี้อยู่คนละ path ให้ปรับ import เป็น:
 // import { User } from "../../modules/users-model.js";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-
-
 
 const sanitizeUser = (user) => {
   const userObject = user.toObject();
@@ -41,11 +33,6 @@ const isValidUserId = (req, res) => {
   return false;
 };
 
-
-
-
-
-
 export const login = async (req, res, next) => {
   const { email, password } = req.body || "";
   const userEmail = String(email || "")
@@ -58,7 +45,7 @@ export const login = async (req, res, next) => {
       .json({ success: false, message: "email or password not correct !" });
   }
   try {
-    const user = await User.findOne({ userEmail }).select("+password");
+    const user = await User.findOne({ email: userEmail }).select("+password");
     if (!user) {
       return res
         .status(404)
@@ -107,7 +94,9 @@ export const registerUser = async (req, res, next) => {
     .toLowerCase();
 
   if (!trimName || !trimSurname || !trimEmail || !password) {
-    const err = new Error("name, surname, email, password, address are required!");
+    const err = new Error(
+      "name, surname, email, password, address are required!",
+    );
     err.success = false;
     err.name = "VaridationError";
     err.status = 404;
@@ -146,6 +135,29 @@ export const registerUser = async (req, res, next) => {
     return next(err);
   }
 };
+// poom Fix get user by id
+export const GetById = async (req, res, next) => {
+  const { _id } = req.params || {};
+
+  if (!_id) {
+    return res
+      .status(404)
+      .json({ success: true, message: " User Not Found!", Error: err });
+  }
+  try {
+    const user = await User.findById({ _id }).select("-cart");
+    console.log(user);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: true, message: "ID Not found!", Error: err });
+    }
+
+    return res.status(200).json({ success: true, message: false, data: user });
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const getUserById = async (req, res, next) => {
   try {
@@ -167,24 +179,6 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res
-        .status(400)
-        .json({ success: false, message: " worng password!! " });
-    }
-
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRETKEY, {
-      expiresIn: "2h",
-    });
-    const isprod = process.env.NODE_ENV === "production";
-
-    res.cookie("accessToken", token, {
-      httpOnly: true,
-      secure: isprod,
-      path: "/",
-      maxAge: 120 * 120 * 2000,
-    });
     return res.status(200).json({
       success: true,
       data: sanitizeUser(user),
@@ -262,6 +256,7 @@ export const updateUserById = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+
 };
 
 export const deleteUserById = async (req, res, next) => {
@@ -289,6 +284,35 @@ export const deleteUserById = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Delete user success",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const logout = async (req, res, next) => {
+  try {
+    const token = req.cookies.accessToken;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "No active session found.",
+      });
+    }
+
+    const isProd = process.env.NODE_ENV === "production";
+
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      path: "/",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully!",
     });
   } catch (err) {
     next(err);
