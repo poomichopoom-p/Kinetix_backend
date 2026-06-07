@@ -111,6 +111,9 @@ export const getBrand = async (req, res, next) => {
 
   try {
     const doc = await Brand.find({ brandName: brand });
+    if(!doc){
+      return res.status(400).json({success:false,message:"Brand not found!",Error:err});
+    }
     return res
       .status(200).json({ success: true, message: "founded!", data: doc });
   } catch (err) {
