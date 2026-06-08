@@ -7,6 +7,7 @@ import {
   updateStaff,
   registerStaff,
   deleteStaffById
+  staffLogin,
 } from "../../modules/controller/staff.controller.js";
 
 export const router = Router();
@@ -16,11 +17,11 @@ router.post("/staffRegister", registerStaff);
 router.get("/", getAllStaff);
 
 // GET /api/staff/:staffId?fields=name,surname,role
-router.get("/:staffId", getStaffById);
+router.get("/:_staffId", getStaffById);
 
-// PATCH /api/staff/:id — admin only
-router.patch("/:id", authUser, isAdmin, updateStaff);
+// PATCH /api/staff/:id — admin only http://localhost:5000/api/staff/admin/login
+router.patch("/:_id", authUser, isAdmin, updateStaff);
+router.post("/admin/login",staffLogin)
 
-router.post("/staffRegister", registerStaff);
 
 router.delete("/:id", authUser, isAdmin, deleteStaffById);

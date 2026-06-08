@@ -7,6 +7,8 @@ import {
   getProduct,
   getBrand,
   getCategory,
+  allBand,
+  deleteProduct,
 } from "../../modules/controller/products.controller.js";
 import { getShoeById } from "../../modules/controller/shoe.controller.js";
 
@@ -17,5 +19,7 @@ router.post("/createProduct", createProduct);
 router.post("/newBrand", createNewBrand);
 
 router.get("/brand/:brand", getBrand);
+router.get("/brand", allBand);
 router.get("/category/:category", getCategory);
-router.get("/:id", getShoeById);
+router.get("/:_id", getShoeById);
+router.delete("/:_id", deleteProduct)

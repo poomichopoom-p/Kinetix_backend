@@ -2,6 +2,7 @@ import { Router } from "express";
 import authUser from "../../middleware/authUser.js";
 import {
   deleteUserById,
+  GetById,
   getUserById,
   login,
   registerUser,
@@ -14,6 +15,6 @@ router.post("/register", registerUser);
 
 router.post("/login", login);
 
-router.get("/:id", authUser, getUserById);
-router.patch("/:id", authUser, updateUserById);
-router.delete("/:id", authUser, deleteUserById);
+router.get("/:_id", authUser, GetById);
+router.patch("/:_id", authUser, updateUserById);
+router.delete("/:_id", authUser, deleteUserById);
