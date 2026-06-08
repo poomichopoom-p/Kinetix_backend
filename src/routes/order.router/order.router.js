@@ -4,6 +4,10 @@ import {
   getOrder,
   newOrder,
   deleteOrder,
+  getUserOrders,
+  getActiveRentals,
+  getPrebooking,
+  getRentalTracking,
 } from "../../modules/controller/orders.controller.js";
 import authUser from "../../middleware/authUser.js";
 import isAdmin from "../../middleware/isAdmin.js";
@@ -11,6 +15,10 @@ import isAdmin from "../../middleware/isAdmin.js";
 export const router = Router();
 // get all order
 router.get("/", getOrder);
+router.get("/my", getUserOrders);
+router.get("/active", getActiveRentals);
+router.get("/prebooking", getPrebooking);
+router.get("/:id/tracking", getRentalTracking);
 
 router.post("/create-order", authUser, newOrder);
 

@@ -38,7 +38,9 @@ const userSchema = new mongoose.Schema(
     ],
     password: { type: String, trim: true, minlength: 8, select: false },
     address: { type: String, minlength: 10, select: true },
-    role:{type:String,trim:true,enum:["user","admin"],default:"user"},
+    phone: { type: String, trim: true, select: true },
+    avatarUrl: { type: String, trim: true, select: true },
+    role: { type: String, trim: true, enum: ["user", "admin"], default: "user" },
     userRank: {
       type: String,
       enum: ["bronze", "gold", "silver", "platinum", "Diamond"],

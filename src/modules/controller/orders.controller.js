@@ -25,6 +25,90 @@ export const newOrder = async (req, res, next) => {
   });
 };
 
+export const getUserOrders = async (req, res, next) => {
+  try {
+    const orders = await Orders.find({
+      customerId: req.user._id,
+      is_active: true,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Get user orders successful",
+      data: orders,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getActiveRentals = async (req, res, next) => {
+  try {
+    const activeOrders = await Orders.find({
+      customerId: req.user._id,
+      is_active: true,
+      status: { $nin: ["Done", "Fail"] },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Get active rentals successful",
+      data: activeOrders,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getPrebooking = async (req, res, next) => {
+  try {
+    const prebookings = await Orders.find({
+      customerId: req.user._id,
+      is_active: true,
+      status: "Waiting",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Get prebooking rentals successful",
+      data: prebookings,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getRentalTracking = async (req, res, next) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid rental ID" });
+  }
+
+  try {
+    const order = await Orders.findOne({
+      _id: id,
+      customerId: req.user._id,
+    });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Rental not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        shippingStatus: order.shippingStatus,
+        trackingNumber: order.trackingNumber,
+        estimatedDelivery: order.estimatedDelivery,
+        status: order.status,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // DELETE /api/order/:id — Soft Delete (sets is_active: false, never removes the document)
 export const deleteOrder = async (req, res, next) => {
   const { id } = req.params;
