@@ -6,6 +6,7 @@ import {
   getStaffById,
   updateStaff,
   registerStaff,
+  deleteStaffById
   staffLogin,
 } from "../../modules/controller/staff.controller.js";
 
@@ -23,3 +24,4 @@ router.patch("/:_id", authUser, isAdmin, updateStaff);
 router.post("/admin/login",staffLogin)
 
 
+router.delete("/:id", authUser, isAdmin, deleteStaffById);

@@ -138,6 +138,38 @@ export const registerStaff = async (req, res, next) => {
   }
 };
 
+const isValidStaffId = (req, res) => {
+  if (!req.params.id) {
+    res.status(400).json({
+      success: false,
+      message: "Staff ID is required",
+    });
+    return false;
+  }
+  return true;
+};
+
+export const deleteStaffById = async (req, res, next) => {
+  try {
+    if (!isValidStaffId(req, res)) return;
+
+    const staff = await Staff.findByIdAndDelete(req.params.id);
+
+    if (!staff) {
+      return res.status(404).json({
+        success: false,
+        message: "Staff not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Delete staff success",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 export const staffLogin = async (req, res, next) => {
   const { email, password } = req.body || {};
   const staffEmail = String(email || "")
