@@ -134,12 +134,10 @@ export const getCategory = async (req, res, next) => {
   try {
     const doc = await Products.find({ category });
     if (!doc) {
-      return res
-        .status(400)
-        .json({
-          success: true,
-          message: "some thing worng category not found!",
-        });
+      return res.status(400).json({
+        success: true,
+        message: "some thing worng category not found!",
+      });
     }
     return res
       .status(200)
@@ -153,18 +151,32 @@ export const allBand = async (req, res, next) => {
   try {
     const doc = await Brand.find();
     if (!doc) {
-      return res
-        .status(400)
-        .json({
-          success: true,
-          message: "some thing worng Product not found!",
-          Error: err,
-        });
+      return res.status(400).json({
+        success: true,
+        message: "some thing worng Product not found!",
+        Error: err,
+      });
     }
     return res
       .status(200)
       .json({ success: true, message: "Get Done!", data: doc });
   } catch (err) {
     next(err);
+  }
+};
+
+export const deleteProduct = async (req, res, next) => {
+  const { _id } = req.params || {};
+
+  if (!_id) {
+    return res
+      .status(400)
+      .json({ success: true, message: "Id not found!", Error: err });
+
+    try {
+      const doc = await Products.findByIdAndDelete({ _id });
+    } catch (err) {
+      next(err);
+    }
   }
 };
