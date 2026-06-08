@@ -33,7 +33,18 @@ const OrdersItem = new mongoose.Schema({
 });
 
 const orderSchema = new mongoose.Schema({
-  // costomerId:ObjectId(001),
+  customerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  shippingStatus: {
+    type: String,
+    enum: ["preparing", "shipped", "delivered", "returning", "Waiting", "successful", "Fail", "Done"],
+    default: "preparing",
+  },
+  trackingNumber: { type: String, trim: true },
+  estimatedDelivery: { type: Date },
   status: {
     type: String,
     required: true,

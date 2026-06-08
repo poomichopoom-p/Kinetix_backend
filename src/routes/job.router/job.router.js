@@ -35,7 +35,7 @@ export const router = Router();
 router.use(deliveryAuth);
 
 router.get("/notifications", getMyNotifications);
-router.patch("/notifications/read", markNotificationRead);
+router.patch("/notifications/:_id", markNotificationRead);
 
 router.post("/", requireRole("USER", "ADMIN"), createJob);
 router.get("/", getJobs);

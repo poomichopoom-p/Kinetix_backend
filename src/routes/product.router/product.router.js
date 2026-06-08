@@ -22,4 +22,5 @@ router.get("/brand/:brand", getBrand);
 router.get("/brand", allBand);
 router.get("/category/:category", getCategory);
 router.get("/:_id", getShoeById);
-router.delete("/:_id", deleteProduct)
+router.delete("/:_id", deleteProduct);
+

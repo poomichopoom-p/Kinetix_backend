@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { User } from "../Model/users-model.js";
+import { Orders } from "../Model/Orders-model.js";
 import bcrypt from "bcrypt";
 
 // ถ้าไฟล์นี้อยู่คนละ path ให้ปรับ import เป็น:
@@ -16,12 +17,22 @@ const sanitizeUser = (user) => {
   return userObject;
 };
 
+const applySelect = (query, fields) => {
+  if (query && typeof query.select === "function") {
+    return query.select(fields);
+  }
+  return query;
+};
+
+const getRequestUserId = (req) => req.params.id || req.params._id;
+
 const isOwner = (req) => {
-  return req.user?._id?.toString() === req.params.id;
+  return req.user?._id?.toString() === getRequestUserId(req);
 };
 
 const isValidUserId = (req, res) => {
-  if (/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
+  const userId = getRequestUserId(req);
+  if (/^[0-9a-fA-F]{24}$/.test(userId)) {
     return true;
   }
 
@@ -137,23 +148,149 @@ export const registerUser = async (req, res, next) => {
 };
 // poom Fix get user by id
 export const GetById = async (req, res, next) => {
-  const { _id } = req.params || {};
+  const _id = getRequestUserId(req);
 
   if (!_id) {
-    return res
-      .status(404)
-      .json({ success: true, message: " User Not Found!", Error: err });
+    return res.status(400).json({
+      success: false,
+      message: "User id is required",
+    });
   }
+
   try {
-    const user = await User.findById({ _id }).select("-cart");
-    console.log(user);
+    const user = await applySelect(User.findById(_id), "-cart");
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: true, message: "ID Not found!", Error: err });
+      return res.status(404).json({
+        success: false,
+        message: "ID Not found!",
+      });
     }
 
     return res.status(200).json({ success: true, message: false, data: user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserProfile = async (req, res, next) => {
+  try {
+    const user = await applySelect(
+      User.findById(req.user._id),
+      "-password -cart",
+    );
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: sanitizeUser(user),
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserStats = async (req, res, next) => {
+  try {
+    const totalRentals = await Orders.countDocuments({
+      customerId: req.user._id,
+    });
+    const activeRentals = await Orders.countDocuments({
+      customerId: req.user._id,
+      is_active: true,
+      status: { $nin: ["Done", "Fail"] },
+    });
+    const returned = await Orders.countDocuments({
+      customerId: req.user._id,
+      status: { $in: ["returning", "Done", "Fail"] },
+    });
+    const returnScore =
+      totalRentals === 0
+        ? 100
+        : Math.max(
+            0,
+            Math.round(((totalRentals - returned) / totalRentals) * 100),
+          );
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        totalRentals,
+        activeRentals,
+        returnScore,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateUserProfile = async (req, res, next) => {
+  try {
+    const allowedFields = [
+      "name",
+      "surname",
+      "email",
+      "password",
+      "address",
+      "phone",
+      "avatarUrl",
+    ];
+
+    const updates = {};
+
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    }
+
+    if (updates.email) {
+      updates.email = String(updates.email).trim().toLowerCase();
+
+      if (!EMAIL_PATTERN.test(updates.email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid email format",
+        });
+      }
+    }
+
+    if (updates.name) {
+      updates.name = String(updates.name).trim();
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid fields to update",
+      });
+    }
+
+    const user = await User.findById(req.user._id).select("+password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    Object.assign(user, updates);
+
+    await user.save({
+      validateModifiedOnly: true,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Update user success",
+      data: sanitizeUser(user),
+    });
   } catch (err) {
     next(err);
   }
@@ -170,7 +307,8 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
-    const user = await User.findById(req.params.id);
+    const userId = getRequestUserId(req);
+    const user = await applySelect(User.findById(userId), "-password");
 
     if (!user) {
       return res.status(404).json({
@@ -199,7 +337,15 @@ export const updateUserById = async (req, res, next) => {
       });
     }
 
-    const allowedFields = ["name", "surname", "email", "password", "address"];
+    const allowedFields = [
+      "name",
+      "surname",
+      "email",
+      "password",
+      "address",
+      "phone",
+      "avatarUrl",
+    ];
 
     const updates = {};
 
@@ -233,7 +379,8 @@ export const updateUserById = async (req, res, next) => {
 
     // ✅ ใช้ findById + save เพื่อให้ mongoose middleware ทำงาน
     // สำคัญมากถ้ามี pre("save") สำหรับ hash password
-    const user = await User.findById(req.params.id).select("+password");
+    const userId = getRequestUserId(req);
+    const user = await applySelect(User.findById(userId), "+password");
 
     if (!user) {
       return res.status(404).json({
@@ -256,7 +403,6 @@ export const updateUserById = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-
 };
 
 export const deleteUserById = async (req, res, next) => {
@@ -270,7 +416,8 @@ export const deleteUserById = async (req, res, next) => {
       });
     }
 
-    const user = await User.findByIdAndDelete(req.params.id);
+    const userId = getRequestUserId(req);
+    const user = await User.findByIdAndDelete(userId);
 
     if (!user) {
       return res.status(404).json({

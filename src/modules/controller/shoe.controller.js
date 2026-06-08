@@ -11,8 +11,7 @@ export const getShoeById = async (req, res, next) => {
   }
 
   try {
-    const shoe = await Products.findById(id);
-    console.log(shoe);
+    const shoe = await Shoe.findById(id);
     if (!shoe) {
       return res.status(404).json({ message: "Shoe not found" });
     }

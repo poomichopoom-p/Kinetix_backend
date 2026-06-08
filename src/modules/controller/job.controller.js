@@ -111,7 +111,7 @@ export const getMyNotifications = async (req, res, next) => {
     next(err);
   }
 };
-
+//bug
 export const markNotificationRead = async (req, res, next) => {
   try {
     await Notification.updateMany({ userId: req.user._id }, { isRead: true });
