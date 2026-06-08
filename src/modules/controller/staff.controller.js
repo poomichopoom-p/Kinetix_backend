@@ -68,7 +68,7 @@ export const updateStaff = async (req, res, next) => {
       id,
       updateData,
       {
-        new: true,
+        returnDocument: 'after',
         runValidators: true
       }
     );

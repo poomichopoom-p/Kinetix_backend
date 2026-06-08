@@ -1,4 +1,14 @@
 import { Router } from "express";
+import { createOrder, getUserOrders, getOrderById } from "../../modules/controller/orders.controller.js";
+import authUser from "../../middleware/authUser.js";
+
+export const orderRouter = Router();
+
+orderRouter.post("/", authUser, createOrder);
+orderRouter.get("/", authUser, getUserOrders);
+orderRouter.get("/:orderId", authUser, getOrderById);
+
+/*import { Router } from "express";
 
 import {
   getOrder,
