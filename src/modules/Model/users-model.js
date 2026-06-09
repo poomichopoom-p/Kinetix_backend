@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
       {
         item: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Products",
+          ref: "Product",
           required: true,
         },
 
@@ -46,6 +46,7 @@ const userSchema = new mongoose.Schema(
       enum: ["bronze", "gold", "silver", "platinum", "Diamond"],
       default: "bronze",
     },
+    points: { type: Number, default: 0 },
   },
   { timestamps: true },
 );

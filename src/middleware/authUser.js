@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
+import { User } from "../modules/Model/users-model.js";
 const authUser = async (req, res, next) => {
   let token = req.cookies?.accessToken;
 
@@ -19,7 +20,14 @@ const authUser = async (req, res, next) => {
 
   try {
     const decodeToken = jwt.verify(token, process.env.JWT_SECRETKEY);
-    req.user = { _id: decodeToken.userId };
+    const user = await User.findById(decodeToken.userId);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found. please signIn again",
+      });
+    }
+    req.user = user;
     return next();
   } catch (err) {
     return res.status(401).json({
