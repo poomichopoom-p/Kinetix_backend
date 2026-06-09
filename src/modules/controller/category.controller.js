@@ -1,4 +1,4 @@
-import { Category } from '.../middleware/Category.js';
+import { Category } from "../../middleware/Category.js";
 
 export const createCategory = async (req, res) => {
     try {

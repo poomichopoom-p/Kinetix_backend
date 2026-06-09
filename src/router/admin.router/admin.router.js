@@ -1,10 +1,10 @@
 // router/admin.router.js
 import { Router } from "express";
-import authUser from "../middleware/authUser.js";
-import isAdmin from "../middleware/isAdmin.js";
-import { Order } from "../modules/Model/Orders-model.js";
-import { User } from "../modules/Model/users-model.js";
-import { Products } from "../modules/Model/products-model.js";
+import authUser from "../../middleware/authUser.js";
+import isAdmin from "../../middleware/isAdmin.js";
+import { Order } from "../../modules/Model/Orders-model.js";
+import { User } from "../../modules/Model/user-model.js";
+import { Products } from "../../modules/Model/products-model.js";
 
 export const adminRouter = Router();
 

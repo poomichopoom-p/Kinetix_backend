@@ -7,7 +7,7 @@ import {
   updateStaff,
   registerStaff,
   staffLogin,
-} from "../../middleware/modules/controller/staff.controller.js";
+} from "../../modules/controller/staff.controller.js";
 
 export const router = Router();
 

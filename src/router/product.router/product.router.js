@@ -9,17 +9,16 @@ import {
   getCategory,
   allBand,
   deleteProduct,
-} from "../../middleware/modules/controller/products.controller.js";
-import { getShoeById } from "../../middleware/modules/controller/shoe.controller.js";
+} from "../../modules/controller/products.controller.js";
+import { getShoeById } from "../../modules/controller/shoe.controller.js";
 
 export const router = Router();
 
 router.get("/", getProduct);
+router.get("/brand", allBand); // More specific than /brand/:brand
+router.get("/brand/:brand", getBrand);
+router.get("/category/:category", getCategory);
 router.post("/createProduct", createProduct);
 router.post("/newBrand", createNewBrand);
-
-router.get("/brand/:brand", getBrand);
-router.get("/brand", allBand);
-router.get("/category/:category", getCategory);
-router.get("/:_id", getShoeById);
-router.delete("/:_id", deleteProduct)
+router.get("/:id", getShoeById); // Use :id for consistency and place after more specific routes
+router.delete("/:id", deleteProduct); // Use :id for consistency

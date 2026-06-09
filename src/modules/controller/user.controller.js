@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import { User } from "../Model/users-model.js";
-import { Orders } from "../Model/Orders-model.js";
+import { User } from "../Model/user-model.js";
+import { Order } from "../Model/Orders-model.js";
 import bcrypt from "bcrypt";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -84,6 +84,7 @@ export const login = async (req, res, next) => {
         email: user.email,
         name: user.name,
         address: user.address,
+        role: user.role || "user",
         userRank: user.userRank,
       },
     });
@@ -321,7 +322,6 @@ export const updateUserById = async (req, res, next) => {
       });
     }
 
-    const allowedFields = ["name", "surname", "email", "password", "address"];
     const allowedFields = [
       "name",
       "surname",
@@ -412,10 +412,8 @@ export const deleteUserById = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-<<<<<<< HEAD
 };
-=======
-};
+
 
 export const logout = async (req, res, next) => {
   try {

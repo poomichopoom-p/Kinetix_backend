@@ -1,4 +1,4 @@
-import { Brand } from "../Model/Brand-model.js";
+import { Brand } from "../Model/Brand.model.js";
 import { Products } from "../Model/products-model.js";
 
 export const getProduct = async (req, res, next) => {
@@ -8,7 +8,6 @@ export const getProduct = async (req, res, next) => {
       return res.status(500).json({
         success: false,
         message: "server error can't get Product!",
-        error: err,
       });
     }
     return res.status(200).json({
@@ -112,8 +111,8 @@ export const getBrand = async (req, res, next) => {
     const doc = await Brand.find({ brandName: brand });
     if (!doc) {
       return res
-        .status(400)
-        .json({ success: false, message: "Brand not found!", Error: err });
+        .status(404)
+        .json({ success: false, message: "Brand not found!" });
     }
     return res
       .status(200)
@@ -135,7 +134,7 @@ export const getCategory = async (req, res, next) => {
     const doc = await Products.find({ category });
     if (!doc) {
       return res.status(400).json({
-        success: true,
+        success: false,
         message: "some thing worng category not found!",
       });
     }
@@ -152,9 +151,8 @@ export const allBand = async (req, res, next) => {
     const doc = await Brand.find();
     if (!doc) {
       return res.status(400).json({
-        success: true,
+        success: false,
         message: "some thing worng Product not found!",
-        Error: err,
       });
     }
     return res
@@ -166,37 +164,18 @@ export const allBand = async (req, res, next) => {
 };
 
 export const deleteProduct = async (req, res, next) => {
-  const { _id } = req.params || {};
+  const { id } = req.params || {};
 
-  if (!_id) {
-    return res
-      .status(400)
-      .json({ success: true, message: "Id not found!", Error: err });
-
-    try {
-      const doc = await Products.findByIdAndDelete({ _id });
-    } catch (err) {
-      next(err);
-    }
-  }
-};
-
-// GET /api/shoes/:id
-export const getShoeById = async (req, res, next) => {
-  const { id } = req.params;
-
-  // Reject malformed IDs before hitting the database
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ message: "Invalid shoe ID" });
+  if (!id) {
+    return res.status(400).json({ success: false, message: "Product ID is required!" });
   }
 
   try {
-    const shoe = await Products.findById(id);
-    if (!shoe) {
-      return res.status(404).json({ message: "Shoe not found" });
+    const doc = await Products.findByIdAndDelete(id);
+    if (!doc) {
+      return res.status(404).json({ success: false, message: "Product not found!" });
     }
-
-    return res.status(200).json({ data: shoe });
+    return res.status(200).json({ success: true, message: "Product deleted successfully!" });
   } catch (err) {
     next(err);
   }
