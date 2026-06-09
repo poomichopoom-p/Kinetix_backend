@@ -1,19 +1,14 @@
 import jwt from "jsonwebtoken";
-import { User } from "../Model/users-model.js";
-import { Orders } from "../Model/Orders-model.js";
+import { User } from "../Model/user-model.js";
+import { Order } from "../Model/Orders-model.js";
 import bcrypt from "bcrypt";
-
-// ถ้าไฟล์นี้อยู่คนละ path ให้ปรับ import เป็น:
-// import { User } from "../../modules/users-model.js";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const sanitizeUser = (user) => {
   const userObject = user.toObject();
-
-  // ✅ ห้ามส่ง password กลับไป frontend
+  // Ensure password never leaks downstream to the UI layer
   delete userObject.password;
-
   return userObject;
 };
 
@@ -35,17 +30,15 @@ const isValidUserId = (req, res) => {
   if (/^[0-9a-fA-F]{24}$/.test(userId)) {
     return true;
   }
-
   res.status(400).json({
     success: false,
     message: "Invalid user id",
   });
-
   return false;
 };
 
 export const login = async (req, res, next) => {
-  const { email, password } = req.body || "";
+  const { email, password } = req.body || {};
   const userEmail = String(email || "")
     .trim()
     .toLowerCase();
@@ -53,21 +46,21 @@ export const login = async (req, res, next) => {
   if (!userEmail || !password) {
     return res
       .status(400)
-      .json({ success: false, message: "email or password not correct !" });
+      .json({ success: false, message: "Email and password are required!" });
   }
   try {
     const user = await User.findOne({ email: userEmail }).select("+password");
     if (!user) {
       return res
         .status(404)
-        .json({ success: false, message: "user not found!" });
+        .json({ success: false, message: "User not found!" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res
         .status(400)
-        .json({ success: false, message: " worng password!! " });
+        .json({ success: false, message: "Wrong password!!" });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRETKEY, {
@@ -81,6 +74,7 @@ export const login = async (req, res, next) => {
       path: "/",
       maxAge: 120 * 120 * 2000,
     });
+
     return res.status(200).json({
       success: true,
       message: "Login success!",
@@ -89,6 +83,8 @@ export const login = async (req, res, next) => {
         _id: user._id,
         email: user.email,
         name: user.name,
+        address: user.address,
+        role: user.role || "user",
         userRank: user.userRank,
       },
     });
@@ -98,7 +94,7 @@ export const login = async (req, res, next) => {
 };
 
 export const registerUser = async (req, res, next) => {
-  const { name, surname, email, password, address } = req.body || "";
+  const { name, surname, email, password, address } = req.body || {};
   const trimName = String(name || "").trim();
   const trimSurname = String(surname || "").trim();
   const trimEmail = String(email || "")
@@ -106,22 +102,15 @@ export const registerUser = async (req, res, next) => {
     .toLowerCase();
 
   if (!trimName || !trimSurname || !trimEmail || !password) {
-    const err = new Error(
-      "name, surname, email, password, address are required!",
-    );
-    err.success = false;
-    err.name = "VaridationError";
-    err.status = 404;
-    err.message = "name,surname,email,password,address  are requied!";
+    const err = new Error("Name, surname, email, and password are required!");
+    err.status = 400;
     return next(err);
   }
+
   if (!EMAIL_PATTERN.test(trimEmail)) {
-    const err = new Error("user");
-    err.name = "WorngPattern";
+    const err = new Error("Invalid email format pattern.");
     err.status = 400;
-    err.message = "your write wrong Pattern";
     return next(err);
-    // res.status(400).json({success:false,message:"worng pattern"})
   }
 
   try {
@@ -133,17 +122,13 @@ export const registerUser = async (req, res, next) => {
       ...(address ? { address } : {}),
     });
 
-    const safe = doc.toObject();
-    delete safe.password;
-
     return res.status(201).json({
       success: true,
       message: "User created successfully!",
       data: sanitizeUser(doc),
     });
   } catch (err) {
-    err.status = 404;
-    err.message = err.message || "Create user failed";
+    err.status = 400;
     return next(err);
   }
 };
@@ -213,9 +198,9 @@ export const getUserStats = async (req, res, next) => {
       totalRentals === 0
         ? 100
         : Math.max(
-            0,
-            Math.round(((totalRentals - returned) / totalRentals) * 100),
-          );
+          0,
+          Math.round(((totalRentals - returned) / totalRentals) * 100),
+        );
 
     return res.status(200).json({
       success: true,
@@ -363,7 +348,6 @@ export const getUserById = async (req, res, next) => {
 
     const userId = getRequestUserId(req);
     const user = await applySelect(User.findById(userId), "-password");
-
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -400,7 +384,6 @@ export const updateUserById = async (req, res, next) => {
       "phone",
       "avatarUrl",
     ];
-
     const updates = {};
 
     for (const field of allowedFields) {
@@ -411,7 +394,6 @@ export const updateUserById = async (req, res, next) => {
 
     if (updates.email) {
       updates.email = String(updates.email).trim().toLowerCase();
-
       if (!EMAIL_PATTERN.test(updates.email)) {
         return res.status(400).json({
           success: false,
@@ -435,7 +417,6 @@ export const updateUserById = async (req, res, next) => {
     // สำคัญมากถ้ามี pre("save") สำหรับ hash password
     const userId = getRequestUserId(req);
     const user = await applySelect(User.findById(userId), "+password");
-
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -444,10 +425,7 @@ export const updateUserById = async (req, res, next) => {
     }
 
     Object.assign(user, updates);
-
-    await user.save({
-      validateModifiedOnly: true,
-    });
+    await user.save({ validateModifiedOnly: true });
 
     return res.status(200).json({
       success: true,
@@ -472,7 +450,6 @@ export const deleteUserById = async (req, res, next) => {
 
     const userId = getRequestUserId(req);
     const user = await User.findByIdAndDelete(userId);
-
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -481,7 +458,6 @@ export const deleteUserById = async (req, res, next) => {
     }
 
     res.clearCookie("accessToken");
-
     return res.status(200).json({
       success: true,
       message: "Delete user success",
@@ -490,6 +466,7 @@ export const deleteUserById = async (req, res, next) => {
     next(err);
   }
 };
+
 
 export const logout = async (req, res, next) => {
   try {

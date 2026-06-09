@@ -108,7 +108,7 @@ const OrderStateMachineService = {
     const updatedJob = await Job.findByIdAndUpdate(
       jobId,
       { status: newStatus, ...timestamps },
-      { new: true },
+      { returnDocument: 'after' },
     ).populate("customerId", "name email").populate("driverId", "name email");
 
     await JobStatusHistory.create({
@@ -123,7 +123,7 @@ const OrderStateMachineService = {
     // Fire-and-forget — don't let notification failure break the response
     notificationService
       .sendForTransition({ job: updatedJob, oldStatus: currentStatus, newStatus })
-      .catch(() => {});
+      .catch(() => { });
 
     return updatedJob;
   },

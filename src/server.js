@@ -4,7 +4,7 @@ import helmet from "helmet";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { router as apiRouter } from "./routes/index.js";
+import { router as apiRouter } from "./router/index.js";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./config/mongoDB.js";
 import { limiter } from "./middleware/rateLimit.js";
@@ -14,7 +14,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const corsOption = {
   origin: [
-    "https://kineti-x-frontend.vercel.app/",
+    "https://kineti-x-frontend.vercel.app",
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:5175",

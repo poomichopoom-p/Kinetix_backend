@@ -21,9 +21,11 @@ const variantSchema = new mongoose.Schema({
   size: [sizeSchema],
 });
 export const rentalSchema = new mongoose.Schema({
+
   "1day": { type: Number, required: true },
   "3day": { type: Number, required: true },
   "7day": { type: Number, required: true },
+
 });
 const ProductsSchema = new mongoose.Schema(
   {

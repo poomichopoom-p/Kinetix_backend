@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, trim: true, minlength: 3, maxlength: 30 },
-    surname: { type: String, trim: true, minlength: 3, maxlength: 30 },
+    surname: { type: String, trim: true, minlength: 2, maxlength: 30 },
     email: {
       type: String,
       trim: true,
@@ -34,13 +34,21 @@ const userSchema = new mongoose.Schema(
           default: 1,
           min: 1,
         },
+        role: {
+          type: String,
+          enum: ["user", "admin"],
+          default: "user",
+        },
       },
     ],
     password: { type: String, trim: true, minlength: 8, select: false },
     address: { type: String, minlength: 10, select: true },
-    phone: { type: String, trim: true, select: true },
-    avatarUrl: { type: String, trim: true, select: true },
-    role: { type: String, trim: true, enum: ["user", "admin"], default: "user" },
+    role: {
+      type: String,
+      trim: true,
+      enum: ["user", "admin"],
+      default: "user",
+    },
     userRank: {
       type: String,
       enum: ["bronze", "gold", "silver", "platinum", "Diamond"],

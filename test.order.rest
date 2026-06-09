@@ -1,0 +1,35 @@
+### Login user to get auth cookie
+POST http://localhost:5000/api/users/login
+Content-Type: application/json
+
+{
+  "email": "jonhwick@example.com",
+  "password": "Wick00009"
+}
+
+### Create a new order (requires auth cookie from login)
+POST http://localhost:5000/api/order/create-order
+Content-Type: application/json
+Cookie: accessToken={accessToken}
+
+{
+  "items": [
+    {
+      "ProductId": "65f1a2b3c4d5e6f7a8b9c0d1",
+      "status": "reserved",
+      "rental_plan": {
+        "1day": 200,
+        "3day": 500,
+        "7day": 1000
+      },
+      "sku_color_code": "PEG40-BLK",
+      "deposit_amount": 150
+    }
+  ],
+  "promoCode": "SUMMER10"
+}
+
+### Get all orders for authenticated user
+GET http://localhost:5000/api/order
+Cookie: accessToken={accessToken}
+Content-Type: application/json

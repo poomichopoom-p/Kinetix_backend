@@ -65,10 +65,14 @@ export const updateStaff = async (req, res, next) => {
   if (is_active !== undefined) updateData.is_active = is_active;
 
   try {
-    const updated = await Staff.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const updated = await Staff.findByIdAndUpdate(
+      id,
+      updateData,
+      {
+        returnDocument: 'after',
+        runValidators: true
+      }
+    );
 
     if (!updated) {
       return res.status(404).json({ message: "Staff not found" });
@@ -138,11 +142,43 @@ export const registerStaff = async (req, res, next) => {
   }
 };
 
+const isValidStaffId = (req, res) => {
+  if (!req.params.id) {
+    res.status(400).json({
+      success: false,
+      message: "Staff ID is required",
+    });
+    return false;
+  }
+  return true;
+};
+
+export const deleteStaffById = async (req, res, next) => {
+  try {
+    if (!isValidStaffId(req, res)) return;
+
+    const staff = await Staff.findByIdAndDelete(req.params.id);
+
+    if (!staff) {
+      return res.status(404).json({
+        success: false,
+        message: "Staff not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Delete staff success",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 export const staffLogin = async (req, res, next) => {
   const { email, password } = req.body || {};
   const staffEmail = String(email || "")
-  .trim()
-  .toLowerCase();
+    .trim()
+    .toLowerCase();
   if (!staffEmail || !password) {
     return res
       .status(400)
@@ -182,12 +218,11 @@ export const staffLogin = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Login success!",
-      accessToken: token,
-      staff: {
+      user: {
         _id: staff._id,
         email: staff.email,
         name: staff.name,
-        role: staff.role,
+        role: staff.role === "admin" ? "ADMIN" : staff.role,
       },
     });
   } catch (err) {

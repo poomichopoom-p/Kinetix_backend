@@ -1,16 +1,27 @@
 import { Staff } from "../modules/Model/staff-model.js";
+import { User } from "../modules/Model/user-model.js";
 
-// Must run after authUser middleware — relies on req.user._id being set
 const isAdmin = async (req, res, next) => {
   try {
-    const userId = req.staff?._id || req.user?._id;
-    const staffMember = await Staff.findById(userId);
 
-    // Deny if user is not in staff collection or does not hold admin role
-    if (!staffMember || staffMember.role !== "admin") {
-      return res.status(403).json({ message: "Forbidden: Admin access required" });
+    let account = await Staff.findById(req.user._id);
+
+
+    if (!account) {
+      account = await User.findById(req.user._id);
     }
 
+
+    const isUserAdmin = account && (account.role === "admin" || account.role === "ADMIN");
+
+    if (!account || !isUserAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Admin access required"
+      });
+    }
+
+    req.admin = account;
     next();
   } catch (err) {
     next(err);
