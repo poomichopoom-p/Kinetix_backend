@@ -19,7 +19,7 @@ router.use("/products", productsRouter);
 router.use("/order", authUser, orderRouter);
 router.use("/rentals", authUser, rentalsRouter);
 router.use("/payments", paymentRouter);
-router.use("/shoes", shoeRouter);
+// router.use("/shoes", shoeRouter);
 router.use("/cart", cartRouter);
 
 // ── Delivery & Return Management ───────────────────────────────────────────────

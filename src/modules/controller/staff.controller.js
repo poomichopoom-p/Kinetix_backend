@@ -154,14 +154,14 @@ export const staffLogin = async (req, res, next) => {
     if (!staff) {
       return res
         .status(404)
-        .json({ success: false, meassge: "account not found!" });
+        .json({ success: false, message: "Account not found!" });
     }
-    const isMatch = await bcrypt.compare(password,staff.password);
+    const isMatch = await bcrypt.compare(password, staff.password);
     // console.log(isMatch)
     if (!isMatch) {
       return res
         .status(401)
-        .json({ success: false, message: " worng password!! " });
+        .json({ success: false, message: "Wrong password!" });
     }
 
     const token = jwt.sign(
@@ -182,6 +182,7 @@ export const staffLogin = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Login success!",
+      accessToken: token,
       staff: {
         _id: staff._id,
         email: staff.email,

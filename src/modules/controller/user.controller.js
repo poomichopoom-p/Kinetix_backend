@@ -84,6 +84,7 @@ export const login = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Login success!",
+      accessToken: token,
       user: {
         _id: user._id,
         email: user.email,
@@ -248,6 +249,7 @@ export const updateUserProfile = async (req, res, next) => {
         updates[field] = req.body[field];
       }
     }
+    console.log(updates)
 
     if (updates.email) {
       updates.email = String(updates.email).trim().toLowerCase();
@@ -263,7 +265,6 @@ export const updateUserProfile = async (req, res, next) => {
     if (updates.name) {
       updates.name = String(updates.name).trim();
     }
-
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({
         success: false,
