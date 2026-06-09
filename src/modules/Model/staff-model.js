@@ -3,13 +3,13 @@ import bcrypt from "bcrypt";
 
 const staffSchema = new mongoose.Schema(
   {
-    name: { type: String, trim: true, minlength: 4, maxlength: 30 },
-    surname: { type: String, trim: true, minlength: 4, maxlength: 30 },
+    name: { type: String, trim: true, minlength: 4, maxlength: 100 },
+    surname: { type: String, trim: true, minlength: 4, maxlength: 100 },
     email: {
       type: String,
       trim: true,
       minlength: 4,
-      maxlength: 30,
+      maxlength: 100,
       match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
       unique: true,
     },
@@ -20,9 +20,9 @@ const staffSchema = new mongoose.Schema(
       minlength: 4,
       maxlength: 100,
     },
-    address: { type: String, minlength: 6, maxlength: 50 },
+    address: { type: String, minlength: 6, maxlength: 200 },
     role: {
-      trpe: String,
+      type: String,
       enum: ["staff", "admin"],
       // default: "staff",
     },

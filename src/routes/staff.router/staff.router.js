@@ -1,5 +1,5 @@
 import { Router } from "express";
-import authUser from "../../middleware/authUser.js";
+import authStaff from "../../middleware/authStaff.js";
 import isAdmin from "../../middleware/isAdmin.js";
 import {
   getAllStaff,
@@ -20,7 +20,7 @@ router.get("/", getAllStaff);
 router.get("/:staffId", getStaffById);
 
 // PATCH /api/staff/:id — admin only http://localhost:5000/api/staff/admin/login
-router.patch("/:id", authUser, isAdmin, updateStaff);
+router.patch("/:id", authStaff, isAdmin, updateStaff);
 router.post("/admin/login",staffLogin)
 
 
