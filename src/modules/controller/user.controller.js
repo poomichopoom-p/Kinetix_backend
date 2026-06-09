@@ -223,7 +223,60 @@ export const getUserStats = async (req, res, next) => {
         totalRentals,
         activeRentals,
         returnScore,
+        points: req.user.points || 0,
       },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserRewards = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const ranks = {
+      bronze: { next: "silver", nextPoints: 1000 },
+      silver: { next: "gold", nextPoints: 2000 },
+      gold: { next: "platinum", nextPoints: 5000 },
+      platinum: { next: "Diamond", nextPoints: 10000 },
+      Diamond: { next: "Legend", nextPoints: 20000 },
+    };
+
+    const currentRankInfo = ranks[user.userRank] || ranks.bronze;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        points: user.points || 0,
+        level: user.userRank,
+        nextLevel: currentRankInfo.next,
+        nextLevelPoints: currentRankInfo.nextPoints,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const redeemPoints = async (req, res, next) => {
+  try {
+    const { points } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (user.points < points) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient points",
+      });
+    }
+
+    user.points -= points;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Points redeemed successfully",
+      remaining: user.points,
     });
   } catch (err) {
     next(err);
