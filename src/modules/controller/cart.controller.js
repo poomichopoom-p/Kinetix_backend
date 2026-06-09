@@ -1,9 +1,10 @@
-import { Cart } from "../Model/cart.model.js";
+import { Cart } from "../Model/Cart.model.js";
+import {User} from "../Model/user-model.js"
 
 // GET /api/cart/:_id
 export const getCart = async (req, res) => {
   try {
-    const cart = await Cart.findOne({ userId: req.params._id });
+    const cart = await User.findOne({ userId: req.params._id });
     return res.status(200).json({ success: true, data: cart?.items || [] });
   } catch (err) {
     console.error("Get cart error:", err);
@@ -16,7 +17,7 @@ export const addToCart = async (req, res) => {
   try {
     const { item, name, image, price, skuColorCode, size, quantity } = req.body || {};
 
-    let cart = await Cart.findOne({ userId: req.params._id });
+    let cart = await User.findOne({ userId: req.params._id });
     if (!cart) cart = new Cart({ userId: req.params._id, items: [] });
 
     const existing = cart.items.find(
