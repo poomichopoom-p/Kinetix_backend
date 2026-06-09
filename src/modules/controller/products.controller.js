@@ -46,7 +46,6 @@ export const createProduct = async (req, res, next) => {
     });
   }
 
-
   try {
     const doc = await Products.create({
       modelName,
@@ -57,9 +56,11 @@ export const createProduct = async (req, res, next) => {
       rentalPlan,
       variants,
     });
-    return res
-      .status(201)
-      .json({ success: true, message: "Product created successfully!", data: doc });
+    return res.status(201).json({
+      success: true,
+      message: "Product created successfully!",
+      data: doc,
+    });
   } catch (err) {
     next(err);
   }
@@ -100,32 +101,102 @@ export const createNewBrand = async (req, res, next) => {
 };
 
 export const getBrand = async (req, res, next) => {
-  const { brand } = req.params;
+  const { brand } = req.params || {};
+  if (!brand) {
+    return res
+      .status(400)
+      .json({ success: false, message: "brand not found!" });
+  }
 
   try {
     const doc = await Brand.find({ brandName: brand });
-
-    return res.status(200).json({
-      success: true,
-      message: "found!",
-      data: doc,
-    });
+    if (!doc) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Brand not found!", Error: err });
+    }
+    return res
+      .status(200)
+      .json({ success: true, message: "founded!", data: doc });
   } catch (err) {
     next(err);
   }
 };
 
 export const getCategory = async (req, res, next) => {
-  const { category } = req.params;
+  const { category } = req.params || {};
+  if (!category) {
+    return res
+      .status(400)
+      .json({ success: false, message: "category not found!" });
+  }
 
   try {
     const doc = await Products.find({ category });
+    if (!doc) {
+      return res.status(400).json({
+        success: true,
+        message: "some thing worng category not found!",
+      });
+    }
+    return res
+      .status(200)
+      .json({ success: true, message: "founded!", data: doc });
+  } catch (err) {
+    next(err);
+  }
+};
 
-    return res.status(200).json({
-      success: true,
-      message: "found!",
-      data: doc,
-    });
+export const allBand = async (req, res, next) => {
+  try {
+    const doc = await Brand.find();
+    if (!doc) {
+      return res.status(400).json({
+        success: true,
+        message: "some thing worng Product not found!",
+        Error: err,
+      });
+    }
+    return res
+      .status(200)
+      .json({ success: true, message: "Get Done!", data: doc });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteProduct = async (req, res, next) => {
+  const { _id } = req.params || {};
+
+  if (!_id) {
+    return res
+      .status(400)
+      .json({ success: true, message: "Id not found!", Error: err });
+
+    try {
+      const doc = await Products.findByIdAndDelete({ _id });
+    } catch (err) {
+      next(err);
+    }
+  }
+};
+
+// GET /api/shoes/:id
+export const getShoeById = async (req, res, next) => {
+  const { id } = req.params;
+
+  // Reject malformed IDs before hitting the database
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid shoe ID" });
+  }
+
+  try {
+    const shoe = await Products.findById(id);
+    if (!shoe) {
+      return res.status(404).json({ message: "Shoe not found" });
+    }
+
+    return res.status(200).json({ data: shoe });
   } catch (err) {
     next(err);
   }

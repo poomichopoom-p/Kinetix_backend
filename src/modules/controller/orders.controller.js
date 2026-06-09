@@ -22,7 +22,7 @@ export const createOrder = async (req, res) => {
 
     // Clear user's cart after order placed
     //await Cart.findOneAndUpdate(
-    await Products.findOneAndUpdate(
+    await Cart.findOneAndUpdate(
       { userId: req.user._id },
       { items: [], updatedAt: new Date() }
     );

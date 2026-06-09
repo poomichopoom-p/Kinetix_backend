@@ -11,11 +11,15 @@ export const createJob = async (req, res, next) => {
   const { jobType, driverId } = req.body || {};
 
   if (!["DELIVERY", "RETURN"].includes(jobType)) {
-    return res.status(400).json({ message: "jobType must be DELIVERY or RETURN" });
+    return res
+      .status(400)
+      .json({ message: "jobType must be DELIVERY or RETURN" });
   }
 
   const initialStatus =
-    jobType === "DELIVERY" ? "WAITING_FOR_ADMIN_CONFIRMATION" : "WAITING_FOR_RETURN_APPROVAL";
+    jobType === "DELIVERY"
+      ? "WAITING_FOR_ADMIN_CONFIRMATION"
+      : "WAITING_FOR_RETURN_APPROVAL";
 
   try {
     const job = await Job.create({
@@ -58,7 +62,9 @@ export const getJobs = async (req, res, next) => {
       Job.countDocuments(filter),
     ]);
 
-    return res.status(200).json({ total, page: Number(page), limit: Number(limit), data: jobs });
+    return res
+      .status(200)
+      .json({ total, page: Number(page), limit: Number(limit), data: jobs });
   } catch (err) {
     next(err);
   }
@@ -102,20 +108,33 @@ export const getJobTimeline = async (req, res, next) => {
 // ── NOTIFICATIONS ──────────────────────────────────────────────────────────────
 
 export const getMyNotifications = async (req, res, next) => {
+  const { _id } = req.params || {};
+  if (!_id) {
+    return res.status(401).json({ success: true, message: "Id Requied!" });
+  }
   try {
-    const notifications = await Notification.find({ userId: req.user._id })
+    const notifications = await Notification.findById({ _id })
       .sort({ createdAt: -1 })
       .limit(50);
+    if (!notifications) {
+      return res
+        .status(401)
+        .json({ success: false, message: "No notification Id!", Error: err });
+    }
+
+    console.log(notifications);
     return res.status(200).json({ data: notifications });
   } catch (err) {
     next(err);
   }
 };
-
+//bug
 export const markNotificationRead = async (req, res, next) => {
   try {
     await Notification.updateMany({ userId: req.user._id }, { isRead: true });
-    return res.status(200).json({ message: "All notifications marked as read" });
+    return res
+      .status(200)
+      .json({ message: "All notifications marked as read" });
   } catch (err) {
     next(err);
   }
@@ -139,7 +158,8 @@ const makeTransitionHandler = (newStatus) => async (req, res, next) => {
     });
     return res.status(200).json({ data: updatedJob });
   } catch (err) {
-    if (err.status) return res.status(err.status).json({ message: err.message });
+    if (err.status)
+      return res.status(err.status).json({ message: err.message });
     next(err);
   }
 };
@@ -169,8 +189,12 @@ export const customerRejectAcknowledge = makeTransitionHandler("CUSTOMER_REJECT_
 export const customerRejectComplete = makeTransitionHandler("CUSTOMER_REJECT_COMPLETED");
 
 // ── CANCELLATION FLOW ─────────────────────────────────────────────────────────
-export const requestCancellation = makeTransitionHandler("CANCELLATION_REQUESTED");
-export const approveCancellation = makeTransitionHandler("CANCELLATION_APPROVED");
+export const requestCancellation = makeTransitionHandler(
+  "CANCELLATION_REQUESTED",
+);
+export const approveCancellation = makeTransitionHandler(
+  "CANCELLATION_APPROVED",
+);
 
 // ── FILE UPLOAD ────────────────────────────────────────────────────────────────
 export const uploadProof = async (req, res, next) => {

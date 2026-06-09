@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { User } from "../Model/users-model.js";
+import { Orders } from "../Model/Orders-model.js";
 import bcrypt from "bcrypt";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -11,12 +12,22 @@ const sanitizeUser = (user) => {
   return userObject;
 };
 
+const applySelect = (query, fields) => {
+  if (query && typeof query.select === "function") {
+    return query.select(fields);
+  }
+  return query;
+};
+
+const getRequestUserId = (req) => req.params.id || req.params._id;
+
 const isOwner = (req) => {
-  return req.user?._id?.toString() === req.params.id;
+  return req.user?._id?.toString() === getRequestUserId(req);
 };
 
 const isValidUserId = (req, res) => {
-  if (/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
+  const userId = getRequestUserId(req);
+  if (/^[0-9a-fA-F]{24}$/.test(userId)) {
     return true;
   }
   res.status(400).json({
@@ -38,7 +49,6 @@ export const login = async (req, res, next) => {
       .json({ success: false, message: "Email and password are required!" });
   }
   try {
-    // FIX: Match against schema key 'email' instead of variable name 'userEmail'
     const user = await User.findOne({ email: userEmail }).select("+password");
     if (!user) {
       return res
@@ -68,6 +78,7 @@ export const login = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Login success!",
+      accessToken: token,
       user: {
         _id: user._id,
         email: user.email,
@@ -120,6 +131,155 @@ export const registerUser = async (req, res, next) => {
     return next(err);
   }
 };
+// poom Fix get user by id
+export const GetById = async (req, res, next) => {
+  const _id = getRequestUserId(req);
+
+  if (!_id) {
+    return res.status(400).json({
+      success: false,
+      message: "User id is required",
+    });
+  }
+
+  try {
+    const user = await applySelect(User.findById(_id), "-cart");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "ID Not found!",
+      });
+    }
+
+    return res.status(200).json({ success: true, message: false, data: user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserProfile = async (req, res, next) => {
+  try {
+    const user = await applySelect(
+      User.findById(req.user._id),
+      "-password -cart",
+    );
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: sanitizeUser(user),
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserStats = async (req, res, next) => {
+  try {
+    const totalRentals = await Orders.countDocuments({
+      customerId: req.user._id,
+    });
+    const activeRentals = await Orders.countDocuments({
+      customerId: req.user._id,
+      is_active: true,
+      status: { $nin: ["Done", "Fail"] },
+    });
+    const returned = await Orders.countDocuments({
+      customerId: req.user._id,
+      status: { $in: ["returning", "Done", "Fail"] },
+    });
+    const returnScore =
+      totalRentals === 0
+        ? 100
+        : Math.max(
+          0,
+          Math.round(((totalRentals - returned) / totalRentals) * 100),
+        );
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        totalRentals,
+        activeRentals,
+        returnScore,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateUserProfile = async (req, res, next) => {
+  try {
+    const allowedFields = [
+      "name",
+      "surname",
+      "email",
+      "password",
+      "address",
+      "phone",
+      "avatarUrl",
+    ];
+
+    const updates = {};
+
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    }
+    console.log(updates)
+
+    if (updates.email) {
+      updates.email = String(updates.email).trim().toLowerCase();
+
+      if (!EMAIL_PATTERN.test(updates.email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid email format",
+        });
+      }
+    }
+
+    if (updates.name) {
+      updates.name = String(updates.name).trim();
+    }
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid fields to update",
+      });
+    }
+
+    const user = await User.findById(req.user._id).select("+password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    Object.assign(user, updates);
+
+    await user.save({
+      validateModifiedOnly: true,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Update user success",
+      data: sanitizeUser(user),
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const getUserById = async (req, res, next) => {
   try {
@@ -132,7 +292,8 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
-    const user = await User.findById(req.params.id);
+    const userId = getRequestUserId(req);
+    const user = await applySelect(User.findById(userId), "-password");
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -140,7 +301,6 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
-    // FIX: Removed duplicate login code block (bcrypt/cookie setting) here
     return res.status(200).json({
       success: true,
       data: sanitizeUser(user),
@@ -162,6 +322,15 @@ export const updateUserById = async (req, res, next) => {
     }
 
     const allowedFields = ["name", "surname", "email", "password", "address"];
+    const allowedFields = [
+      "name",
+      "surname",
+      "email",
+      "password",
+      "address",
+      "phone",
+      "avatarUrl",
+    ];
     const updates = {};
 
     for (const field of allowedFields) {
@@ -191,7 +360,10 @@ export const updateUserById = async (req, res, next) => {
       });
     }
 
-    const user = await User.findById(req.params.id).select("+password");
+    // ✅ ใช้ findById + save เพื่อให้ mongoose middleware ทำงาน
+    // สำคัญมากถ้ามี pre("save") สำหรับ hash password
+    const userId = getRequestUserId(req);
+    const user = await applySelect(User.findById(userId), "+password");
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -223,7 +395,8 @@ export const deleteUserById = async (req, res, next) => {
       });
     }
 
-    const user = await User.findByIdAndDelete(req.params.id);
+    const userId = getRequestUserId(req);
+    const user = await User.findByIdAndDelete(userId);
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -235,6 +408,38 @@ export const deleteUserById = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Delete user success",
+    });
+  } catch (err) {
+    next(err);
+  }
+<<<<<<< HEAD
+};
+=======
+};
+
+export const logout = async (req, res, next) => {
+  try {
+    const token = req.cookies.accessToken;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "No active session found.",
+      });
+    }
+
+    const isProd = process.env.NODE_ENV === "production";
+
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      path: "/",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully!",
     });
   } catch (err) {
     next(err);

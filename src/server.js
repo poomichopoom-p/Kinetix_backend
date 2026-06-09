@@ -14,7 +14,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const corsOption = {
   origin: [
-    "https://kinetix-qnx5.onrender.com",
+    "https://kineti-x-frontend.vercel.app/",
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:5175",

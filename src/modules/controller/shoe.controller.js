@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Shoe } from "../Model/shoue-model.js";
+import { Shoe } from "../Model/shoe-model.js";
 import { Products } from "../Model/products-model.js";
 // GET /api/shoes/:id
 export const getShoeById = async (req, res, next) => {
