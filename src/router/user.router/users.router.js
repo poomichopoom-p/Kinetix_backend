@@ -6,7 +6,7 @@ import {
   login,
   registerUser,
   updateUserById,
-} from "../../middleware/modules/controller/user.controller.js";
+} from "../../modules/controller/user.controller.js";
 
 export const router = Router();
 

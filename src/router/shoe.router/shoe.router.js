@@ -1,13 +1,12 @@
 import { Router } from 'express';
+import { getShoeById } from '../../modules/controller/shoe.controller.js';
 import {
-    getAllShoes,
-    getShoeById,
-    getShoesByBrand,
-    getShoesByCategory,
-    createShoe,
-    updateShoe,
-    deleteShoe,
-} from '../../middleware/modules/controller/shoe.controller.js';
+    getProduct as getAllShoes,
+    getBrand as getShoesByBrand,
+    getCategory as getShoesByCategory,
+    createProduct as createShoe,
+    deleteProduct as deleteShoe,
+} from '../../modules/controller/products.controller.js';
 import authUser from '../../middleware/authUser.js'; // Assuming authUser middleware exists
 import authorizeRoles from '../../middleware/authorizeRoles.js'; // Assuming authorizeRoles middleware exists
 
@@ -17,6 +16,6 @@ export const router = Router();
 router.use(authUser, authorizeRoles('admin'));
 
 router.route('/').get(getAllShoes).post(createShoe);
-router.route('/:id').get(getShoeById).patch(updateShoe).delete(deleteShoe);
+router.route('/:id').get(getShoeById).delete(deleteShoe);
 router.get('/brand/:brand', getShoesByBrand);
 router.get('/category/:category', getShoesByCategory);

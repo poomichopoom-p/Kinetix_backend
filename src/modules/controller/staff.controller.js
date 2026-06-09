@@ -225,12 +225,11 @@ export const staffLogin = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Login success!",
-      accessToken: token,
-      staff: {
+      user: {
         _id: staff._id,
         email: staff.email,
         name: staff.name,
-        role: staff.role,
+        role: staff.role === "admin" ? "ADMIN" : staff.role,
       },
     });
   } catch (err) {

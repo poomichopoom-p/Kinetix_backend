@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createBrand, getAllBrands } from '../../middleware/modules/controller/brand.controller.js';
+import { createBrand, getAllBrands } from '../../modules/controller/brand.controller.js';
 import authUser from '../../middleware/authUser.js';
 import authorizeRoles from '../../middleware/authorizeRoles.js';
 

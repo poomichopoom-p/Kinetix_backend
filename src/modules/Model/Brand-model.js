@@ -1,4 +1,4 @@
-import mongoose, { model, modelNames } from "mongoose";
+/*import mongoose, { model, modelNames } from "mongoose";
 
 const brandSchema = new mongoose.Schema(
   {
@@ -20,4 +20,6 @@ const brandSchema = new mongoose.Schema(
   { timestamps: true },
 );
 // module.exports = mongoose.model("Brand",brandSchema);
-export const Brand = mongoose.model("Brand", brandSchema);
+export const Brand = mongoose.models.Brand || mongoose.model("Brand", brandSchema);
+
+*/
