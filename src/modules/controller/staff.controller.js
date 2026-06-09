@@ -65,12 +65,6 @@ export const updateStaff = async (req, res, next) => {
   if (is_active !== undefined) updateData.is_active = is_active;
 
   try {
-<<<<<<< HEAD
-    const updated = await Staff.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    });
-=======
     const updated = await Staff.findByIdAndUpdate(
       id,
       updateData,
@@ -79,7 +73,6 @@ export const updateStaff = async (req, res, next) => {
         runValidators: true
       }
     );
->>>>>>> 59678a2 (update checkout)
 
     if (!updated) {
       return res.status(404).json({ message: "Staff not found" });
