@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Brand } from "../Model/Brand.model.js";
+import { Brand } from "../Model/Brand-model.js";
 import { Products } from "../Model/products-model.js";
 
 export const getProduct = async (req, res, next) => {
@@ -188,7 +188,6 @@ export const allBand = async (req, res, next) => {
 };
 
 export const deleteProduct = async (req, res, next) => {
-
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {

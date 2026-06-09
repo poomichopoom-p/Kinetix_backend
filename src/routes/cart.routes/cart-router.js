@@ -6,6 +6,6 @@ export const router = Router();
 
 router.post("/addItem/:userId", addItem);
 router.delete("/removeItem/:userId", removeProduct);
-router.get("/:_id", getAdditem );
+router.get("/:_id", getAdditem);
 router.patch("/:userId/:itemId", updateItem);
 router.delete("/:userId/:itemId", deleteItem);
