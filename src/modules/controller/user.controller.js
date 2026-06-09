@@ -3,12 +3,6 @@ import { User } from "../Model/user-model.js";
 import { Order } from "../Model/Orders-model.js";
 import bcrypt from "bcrypt";
 
-<<<<<<< HEAD
-// ถ้าไฟล์นี้อยู่คนละ path ให้ปรับ import เป็น:
-// import { User } from "../../modules/users-model.js";
-
-=======
->>>>>>> 59678a2 (update checkout)
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const sanitizeUser = (user) => {
@@ -55,10 +49,7 @@ export const login = async (req, res, next) => {
       .json({ success: false, message: "Email and password are required!" });
   }
   try {
-<<<<<<< HEAD
-=======
     // FIX: Match against schema key 'email' instead of variable name 'userEmail'
->>>>>>> 59678a2 (update checkout)
     const user = await User.findOne({ email: userEmail }).select("+password");
     if (!user) {
       return res
@@ -112,18 +103,8 @@ export const registerUser = async (req, res, next) => {
     .toLowerCase();
 
   if (!trimName || !trimSurname || !trimEmail || !password) {
-<<<<<<< HEAD
-    const err = new Error(
-      "name, surname, email, password, address are required!",
-    );
-    err.success = false;
-    err.name = "VaridationError";
-    err.status = 404;
-    err.message = "name,surname,email,password,address  are requied!";
-=======
     const err = new Error("Name, surname, email, and password are required!");
     err.status = 400;
->>>>>>> 59678a2 (update checkout)
     return next(err);
   }
 
@@ -366,13 +347,7 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
-<<<<<<< HEAD
-    const userId = getRequestUserId(req);
-    const user = await applySelect(User.findById(userId), "-password");
-
-=======
     const user = await User.findById(req.params.id);
->>>>>>> 59678a2 (update checkout)
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -380,10 +355,7 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
-<<<<<<< HEAD
-=======
     // FIX: Removed duplicate login code block (bcrypt/cookie setting) here
->>>>>>> 59678a2 (update checkout)
     return res.status(200).json({
       success: true,
       data: sanitizeUser(user),
@@ -404,10 +376,6 @@ export const updateUserById = async (req, res, next) => {
       });
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> dbc1d4f (fixing 01)
     const allowedFields = [
       "name",
       "surname",
@@ -418,9 +386,9 @@ export const updateUserById = async (req, res, next) => {
       "avatarUrl",
     ];
 
-=======
+
     const allowedFields = ["name", "surname", "email", "password", "address"];
->>>>>>> 59678a2 (update checkout)
+
     const updates = {};
 
     for (const field of allowedFields) {
@@ -450,15 +418,11 @@ export const updateUserById = async (req, res, next) => {
       });
     }
 
-<<<<<<< HEAD
     // ✅ ใช้ findById + save เพื่อให้ mongoose middleware ทำงาน
     // สำคัญมากถ้ามี pre("save") สำหรับ hash password
     const userId = getRequestUserId(req);
     const user = await applySelect(User.findById(userId), "+password");
 
-=======
-    const user = await User.findById(req.params.id).select("+password");
->>>>>>> 59678a2 (update checkout)
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -490,13 +454,9 @@ export const deleteUserById = async (req, res, next) => {
       });
     }
 
-<<<<<<< HEAD
     const userId = getRequestUserId(req);
     const user = await User.findByIdAndDelete(userId);
 
-=======
-    const user = await User.findByIdAndDelete(req.params.id);
->>>>>>> 59678a2 (update checkout)
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -512,10 +472,7 @@ export const deleteUserById = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> dbc1d4f (fixing 01)
+
 };
 
 
@@ -547,6 +504,21 @@ export const logout = async (req, res, next) => {
     next(err);
   }
 };
-=======
+
+
+export const usersLogout = async (req, res) => {
+  const isProd = process.env.NODE_ENV === "production";
+
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: isProd, // only send over HTTPS in production
+    sameSite: isProd ? "none" : "lax",
+    parh: "/",
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Logout success !",
+  });
 };
->>>>>>> 59678a2 (update checkout)
+
