@@ -1,11 +1,56 @@
 import jwt from "jsonwebtoken";
-<<<<<<< HEAD
 import cookieParser from "cookie-parser";
 import { User } from "../modules/Model/users-model.js";
 const authUser = async (req, res, next) => {
   let token = req.cookies?.accessToken;
-=======
->>>>>>> dbc1d4f7fb5e51db8f7de34df5f96f34c3bc162e
+}
+
+import { User } from "../modules/Model/user-model.js";   // 🔥 make sure this import is here
+
+const authUser = async (req, res, next) => {
+  // 1. Try cookie first, then Authorization header
+  let token = req.cookies?.accessToken;
+
+  if (!token && req.headers.authorization?.startsWith("Bearer ")) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: "Access denied. No token! Please sign in again",
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRETKEY);
+
+    if (!decoded?.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token structure. Please sign in again",
+      });
+    }
+
+    const user = await User.findById(decoded.userId).select("role");
+    req.user = {
+      _id: decoded.userId,
+      role: user?.role || "user",
+    };
+
+    next();
+  } catch (err) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token. Please sign in again",
+    });
+  }
+};
+
+export default authUser;
+
+/*import jwt from "jsonwebtoken";
+>>>>>>> 68cfab0c780d1335596fc7ed3ad85581fc1fc9ae
 
 const authUser = async (req, res, next) => {
   const token = req.cookies.accessToken;
@@ -20,16 +65,6 @@ const authUser = async (req, res, next) => {
   try {
 
     const decodeToken = jwt.verify(token, process.env.JWT_SECRETKEY);
-<<<<<<< HEAD
-    const user = await User.findById(decodeToken.userId);
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "User not found. please signIn again",
-      });
-    }
-    req.user = user;
-=======
 
     if (!decodeToken || !decodeToken.userId) {
       return res.status(401).json({
@@ -44,7 +79,6 @@ const authUser = async (req, res, next) => {
       role: user?.role || "user"
     };
 
->>>>>>> dbc1d4f7fb5e51db8f7de34df5f96f34c3bc162e
     return next();
 
     return res.status(401).json({
@@ -61,3 +95,4 @@ const authUser = async (req, res, next) => {
 };
 
 export default authUser;
+*/

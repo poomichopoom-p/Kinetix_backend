@@ -17,7 +17,8 @@ import { adminRouter } from "./admin.router/admin.router.js";
 export const router = Router();
 
 router.use("/users", usersRouter);
-router.use("/staff", isAdmin, staffRouter);
+//router.use("/staff", isAdmin, staffRouter);
+router.use("/staff", staffRouter);
 router.use("/products", productsRouter);
 router.use("/products/admin", authUser, isAdmin, productsRouter);
 router.use("/orders", authUser, isAdmin, orderRouter);
