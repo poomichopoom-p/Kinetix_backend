@@ -10,6 +10,7 @@ import {
   allBand,
   deleteProduct,
   getShoeById,
+  updateProduct,
 } from "../../modules/controller/products.controller.js";
 
 
@@ -22,6 +23,7 @@ router.post("/newBrand", createNewBrand);
 router.get("/brand/:brand", getBrand);
 router.get("/brand", allBand);
 router.get("/category/:category", getCategory);
-router.get("/:_id", getShoeById);
-router.delete("/:_id", deleteProduct);
+router.get("/:id", getShoeById);
+router.patch("/:id", updateProduct);
+router.delete("/:id", deleteProduct);
 
