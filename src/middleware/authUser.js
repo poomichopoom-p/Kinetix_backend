@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-
+import cookieParser from "cookie-parser";
 const authUser = async (req, res, next) => {
   let token = req.cookies?.accessToken;
 
