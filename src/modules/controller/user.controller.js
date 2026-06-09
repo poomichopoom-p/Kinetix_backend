@@ -496,3 +496,19 @@ export const logout = async (req, res, next) => {
     next(err);
   }
 };
+
+export const usersLogout = async (req, res) => {
+  const isProd = process.env.NODE_ENV === "production";
+
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: isProd, // only send over HTTPS in production
+    sameSite: isProd ? "none" : "lax",
+    parh: "/",
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Logout success !",
+  });
+};

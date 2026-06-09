@@ -6,12 +6,14 @@ import {
   login,
   registerUser,
   updateUserById,
+  usersLogout,
 } from "../../modules/controller/user.controller.js";
 
 export const router = Router();
 
 router.post("/register", registerUser);
 router.post("/login", login);
+router.post("/logout", usersLogout)
 
 router.get("/:id", authUser, getUserById);
 router.patch("/:id", authUser, updateUserById);
