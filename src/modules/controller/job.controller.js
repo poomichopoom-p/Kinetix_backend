@@ -32,7 +32,7 @@ export const createJob = async (req, res, next) => {
     // Notify admins of new job
     notificationService
       .sendForTransition({ job, oldStatus: null, newStatus: initialStatus })
-      .catch(() => {});
+      .catch(() => { });
 
     return res.status(201).json({ data: job });
   } catch (err) {
@@ -165,9 +165,13 @@ const makeTransitionHandler = (newStatus) => async (req, res, next) => {
 };
 
 // ── DELIVERY FLOW ──────────────────────────────────────────────────────────────
+<<<<<<< HEAD
 export const adminConfirm = makeTransitionHandler(
   "WAITING_FOR_DRIVER_CONFIRMATION",
 );
+=======
+export const adminConfirm = makeTransitionHandler("WAITING_FOR_DRIVER_CONFIRMATION");
+>>>>>>> 59678a2 (update checkout)
 export const driverConfirm = makeTransitionHandler("DRIVER_CONFIRMED");
 export const pickup = makeTransitionHandler("PICKED_UP");
 export const inTransit = makeTransitionHandler("IN_TRANSIT");
@@ -175,28 +179,41 @@ export const complete = makeTransitionHandler("DELIVERED");
 
 // ── RETURN FLOW ────────────────────────────────────────────────────────────────
 export const returnApprove = makeTransitionHandler("RETURN_DRIVER_PENDING");
+<<<<<<< HEAD
 export const returnDriverConfirm = makeTransitionHandler(
   "RETURN_DRIVER_CONFIRMED",
 );
+=======
+export const returnDriverConfirm = makeTransitionHandler("RETURN_DRIVER_CONFIRMED");
+>>>>>>> 59678a2 (update checkout)
 export const returnPickup = makeTransitionHandler("RETURN_PICKED_UP");
 export const returnInTransit = makeTransitionHandler("RETURN_IN_TRANSIT");
 export const returnComplete = makeTransitionHandler("RETURN_COMPLETED");
 
 // ── REJECT FLOW ────────────────────────────────────────────────────────────────
 export const reject = makeTransitionHandler("REJECT_REQUESTED");
+<<<<<<< HEAD
 export const rejectDriverConfirm = makeTransitionHandler(
   "REJECT_DRIVER_CONFIRMED",
 );
+=======
+export const rejectDriverConfirm = makeTransitionHandler("REJECT_DRIVER_CONFIRMED");
+>>>>>>> 59678a2 (update checkout)
 export const rejectApprove = makeTransitionHandler("REJECT_APPROVED");
 
 // ── CUSTOMER REJECT FLOW ───────────────────────────────────────────────────────
 export const customerReject = makeTransitionHandler("CUSTOMER_REJECTED");
+<<<<<<< HEAD
 export const customerRejectAcknowledge = makeTransitionHandler(
   "CUSTOMER_REJECT_ACKNOWLEDGED",
 );
 export const customerRejectComplete = makeTransitionHandler(
   "CUSTOMER_REJECT_COMPLETED",
 );
+=======
+export const customerRejectAcknowledge = makeTransitionHandler("CUSTOMER_REJECT_ACKNOWLEDGED");
+export const customerRejectComplete = makeTransitionHandler("CUSTOMER_REJECT_COMPLETED");
+>>>>>>> 59678a2 (update checkout)
 
 // ── CANCELLATION FLOW ─────────────────────────────────────────────────────────
 export const requestCancellation = makeTransitionHandler(
@@ -220,7 +237,7 @@ export const uploadProof = async (req, res, next) => {
     const job = await Job.findByIdAndUpdate(
       id,
       { proofOfDeliveryImage: req.file.path },
-      { new: true },
+      { returnDocument: 'after' },
     );
     if (!job) return res.status(404).json({ message: "Job not found" });
     return res.status(200).json({ data: job });

@@ -14,7 +14,7 @@ const authUser = async (req, res, next) => {
   if (!token) {
     return res.status(401).json({
       success: false,
-      message: "Access denied. No token! please signIn again",
+      message: "Access denied. No token! Please sign in again",
     });
   }
 
@@ -32,7 +32,7 @@ const authUser = async (req, res, next) => {
   } catch (err) {
     return res.status(401).json({
       success: false,
-      message: "Invalid or expired token. please signIn again",
+      message: "Invalid or expired token. Please sign in again",
     });
   }
 };

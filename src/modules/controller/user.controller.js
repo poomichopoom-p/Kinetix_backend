@@ -3,17 +3,18 @@ import { User } from "../Model/users-model.js";
 import { Orders } from "../Model/Orders-model.js";
 import bcrypt from "bcrypt";
 
+<<<<<<< HEAD
 // ถ้าไฟล์นี้อยู่คนละ path ให้ปรับ import เป็น:
 // import { User } from "../../modules/users-model.js";
 
+=======
+>>>>>>> 59678a2 (update checkout)
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const sanitizeUser = (user) => {
   const userObject = user.toObject();
-
-  // ✅ ห้ามส่ง password กลับไป frontend
+  // Ensure password never leaks downstream to the UI layer
   delete userObject.password;
-
   return userObject;
 };
 
@@ -35,17 +36,15 @@ const isValidUserId = (req, res) => {
   if (/^[0-9a-fA-F]{24}$/.test(userId)) {
     return true;
   }
-
   res.status(400).json({
     success: false,
     message: "Invalid user id",
   });
-
   return false;
 };
 
 export const login = async (req, res, next) => {
-  const { email, password } = req.body || "";
+  const { email, password } = req.body || {};
   const userEmail = String(email || "")
     .trim()
     .toLowerCase();
@@ -53,21 +52,25 @@ export const login = async (req, res, next) => {
   if (!userEmail || !password) {
     return res
       .status(400)
-      .json({ success: false, message: "email or password not correct !" });
+      .json({ success: false, message: "Email and password are required!" });
   }
   try {
+<<<<<<< HEAD
+=======
+    // FIX: Match against schema key 'email' instead of variable name 'userEmail'
+>>>>>>> 59678a2 (update checkout)
     const user = await User.findOne({ email: userEmail }).select("+password");
     if (!user) {
       return res
         .status(404)
-        .json({ success: false, message: "user not found!" });
+        .json({ success: false, message: "User not found!" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res
         .status(400)
-        .json({ success: false, message: " worng password!! " });
+        .json({ success: false, message: "Wrong password!!" });
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRETKEY, {
@@ -81,6 +84,7 @@ export const login = async (req, res, next) => {
       path: "/",
       maxAge: 120 * 120 * 2000,
     });
+
     return res.status(200).json({
       success: true,
       message: "Login success!",
@@ -89,6 +93,7 @@ export const login = async (req, res, next) => {
         _id: user._id,
         email: user.email,
         name: user.name,
+        address: user.address,
         userRank: user.userRank,
       },
     });
@@ -98,7 +103,7 @@ export const login = async (req, res, next) => {
 };
 
 export const registerUser = async (req, res, next) => {
-  const { name, surname, email, password, address } = req.body || "";
+  const { name, surname, email, password, address } = req.body || {};
   const trimName = String(name || "").trim();
   const trimSurname = String(surname || "").trim();
   const trimEmail = String(email || "")
@@ -106,6 +111,7 @@ export const registerUser = async (req, res, next) => {
     .toLowerCase();
 
   if (!trimName || !trimSurname || !trimEmail || !password) {
+<<<<<<< HEAD
     const err = new Error(
       "name, surname, email, password, address are required!",
     );
@@ -113,15 +119,17 @@ export const registerUser = async (req, res, next) => {
     err.name = "VaridationError";
     err.status = 404;
     err.message = "name,surname,email,password,address  are requied!";
+=======
+    const err = new Error("Name, surname, email, and password are required!");
+    err.status = 400;
+>>>>>>> 59678a2 (update checkout)
     return next(err);
   }
+
   if (!EMAIL_PATTERN.test(trimEmail)) {
-    const err = new Error("user");
-    err.name = "WorngPattern";
+    const err = new Error("Invalid email format pattern.");
     err.status = 400;
-    err.message = "your write wrong Pattern";
     return next(err);
-    // res.status(400).json({success:false,message:"worng pattern"})
   }
 
   try {
@@ -133,17 +141,13 @@ export const registerUser = async (req, res, next) => {
       ...(address ? { address } : {}),
     });
 
-    const safe = doc.toObject();
-    delete safe.password;
-
     return res.status(201).json({
       success: true,
       message: "User created successfully!",
       data: sanitizeUser(doc),
     });
   } catch (err) {
-    err.status = 404;
-    err.message = err.message || "Create user failed";
+    err.status = 400;
     return next(err);
   }
 };
@@ -361,9 +365,13 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
+<<<<<<< HEAD
     const userId = getRequestUserId(req);
     const user = await applySelect(User.findById(userId), "-password");
 
+=======
+    const user = await User.findById(req.params.id);
+>>>>>>> 59678a2 (update checkout)
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -371,6 +379,10 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
+<<<<<<< HEAD
+=======
+    // FIX: Removed duplicate login code block (bcrypt/cookie setting) here
+>>>>>>> 59678a2 (update checkout)
     return res.status(200).json({
       success: true,
       data: sanitizeUser(user),
@@ -391,6 +403,7 @@ export const updateUserById = async (req, res, next) => {
       });
     }
 
+<<<<<<< HEAD
     const allowedFields = [
       "name",
       "surname",
@@ -401,6 +414,9 @@ export const updateUserById = async (req, res, next) => {
       "avatarUrl",
     ];
 
+=======
+    const allowedFields = ["name", "surname", "email", "password", "address"];
+>>>>>>> 59678a2 (update checkout)
     const updates = {};
 
     for (const field of allowedFields) {
@@ -411,7 +427,6 @@ export const updateUserById = async (req, res, next) => {
 
     if (updates.email) {
       updates.email = String(updates.email).trim().toLowerCase();
-
       if (!EMAIL_PATTERN.test(updates.email)) {
         return res.status(400).json({
           success: false,
@@ -431,11 +446,15 @@ export const updateUserById = async (req, res, next) => {
       });
     }
 
+<<<<<<< HEAD
     // ✅ ใช้ findById + save เพื่อให้ mongoose middleware ทำงาน
     // สำคัญมากถ้ามี pre("save") สำหรับ hash password
     const userId = getRequestUserId(req);
     const user = await applySelect(User.findById(userId), "+password");
 
+=======
+    const user = await User.findById(req.params.id).select("+password");
+>>>>>>> 59678a2 (update checkout)
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -444,10 +463,7 @@ export const updateUserById = async (req, res, next) => {
     }
 
     Object.assign(user, updates);
-
-    await user.save({
-      validateModifiedOnly: true,
-    });
+    await user.save({ validateModifiedOnly: true });
 
     return res.status(200).json({
       success: true,
@@ -470,9 +486,13 @@ export const deleteUserById = async (req, res, next) => {
       });
     }
 
+<<<<<<< HEAD
     const userId = getRequestUserId(req);
     const user = await User.findByIdAndDelete(userId);
 
+=======
+    const user = await User.findByIdAndDelete(req.params.id);
+>>>>>>> 59678a2 (update checkout)
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -481,7 +501,6 @@ export const deleteUserById = async (req, res, next) => {
     }
 
     res.clearCookie("accessToken");
-
     return res.status(200).json({
       success: true,
       message: "Delete user success",
@@ -489,6 +508,7 @@ export const deleteUserById = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+<<<<<<< HEAD
 };
 
 export const logout = async (req, res, next) => {
@@ -519,3 +539,6 @@ export const logout = async (req, res, next) => {
     next(err);
   }
 };
+=======
+};
+>>>>>>> 59678a2 (update checkout)
