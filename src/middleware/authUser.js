@@ -50,7 +50,10 @@ const authUser = async (req, res, next) => {
 export default authUser;
 
 /*import jwt from "jsonwebtoken";
+<<<<<<< HEAD
 >>>>>>> 68cfab0c780d1335596fc7ed3ad85581fc1fc9ae
+=======
+>>>>>>> yok
 
 const authUser = async (req, res, next) => {
   const token = req.cookies.accessToken;
