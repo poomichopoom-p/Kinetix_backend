@@ -3,20 +3,90 @@ import { User } from "../Model/users-model.js";
 
 export const addItem = async (req, res, next) => {
   const { item, skuColorCode, size, quantity } = req.body || {};
-  const { userId } = req.params;
+  const userId = req.params._id;
+
+  if (!item || !skuColorCode || !size || !quantity) {
+    return res.status(400).json({ success: false, message: "Missing product information" });
+  }
+
+  try {
+    const product = await Products.findById(item);
+
+    const variant = product.variants.find((v) => v.skuColorCode === skuColorCode);
+    if (!variant) return res.status(404).json({ success: false, message: "Color not found" });
+
+    const selectedSize = variant.size.find((s) => s.size === size);
+    if (!selectedSize) return res.status(404).json({ success: false, message: "Size not found" });
+
+    if (selectedSize.stock < Number(quantity)) {
+      return res.status(400).json({ success: false, message: "Out of stock" });
+    }
+
+    // Add item to cart array
+    const user = await User.findByIdAndUpdate(userId, {
+      $push: {
+        cart: { item, skuColorCode, size, quantity: Number(quantity) },
+      },
+    }, { new: true }).select("+cart"); // { new: true } returns the updated user data
+
+    return res.status(201).json({ success: true, message: "Add success!", data: user.cart });
+  } catch (err) {
+    console.error(err);
+    next(err);
+  }
+};
+
+export const getAdditem = async (req, res, next) => {
+  const { _id } = req.params; // FIXED: Removed ._id from the right side
+
+  try {
+    const user = await User.findById(_id).select("+cart");
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found!" });
+    }
+
+    return res.status(200).json({ success: true, message: "Get item done!", data: user.cart || [] });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// NEW: Controller to delete an item
+export const removeItem = async (req, res, next) => {
+  const { _id } = req.params; // User ID
+  const { item, skuColorCode, size } = req.body || {}; // Details of the shoe to remove
+
+  try {
+    // $pull removes the specific item from the cart array
+    const user = await User.findByIdAndUpdate(_id, {
+      $pull: {
+        cart: { item, skuColorCode, size }
+      }
+    }, { new: true }).select("+cart");
+
+    return res.status(200).json({ success: true, message: "Item removed!", data: user.cart });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/*import { Products } from "../Model/products-model.js";
+import { User } from "../Model/users-model.js";
+
+export const addItem = async (req, res, next) => {
+  const { item, skuColorCode, size, quantity } = req.body || {};
+  const userId = req.params._id;
   if (!item || !skuColorCode || !size || !quantity) {
     return res.status(400).json({
       success: false,
-      message: "Incomplete information provided.",
+      message: "can't found product",
     });
   }
 
-  const quan = Number(quantity);
+  const quan = Number(quantity || {});
   try {
     const product = await Products.findById(item);
-    if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found" });
-    }
 
     const variant = product.variants.find(
       (v) => v.skuColorCode === skuColorCode,
@@ -186,3 +256,4 @@ export const deleteItem = async (req, res, next) => {
     next(err);
   }
 };
+*/

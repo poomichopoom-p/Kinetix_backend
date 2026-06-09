@@ -1,4 +1,4 @@
-// import mongoose from "mongoose";
+import mongoose from "mongoose";
 
 // const sizeSchema = new mongoose.Schema(
 //   {
@@ -54,10 +54,7 @@
 
 // export const Products = mongoose.model("Product", ProductsSchema);
 
-
-
 // export const Products = mongoose.model("Product", ProductsSchema);
-
 
 import mongoose from "mongoose";
 
@@ -72,7 +69,7 @@ const sizeSchema = new mongoose.Schema(
       default: 0,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const variantSchema = new mongoose.Schema(
@@ -97,7 +94,7 @@ const variantSchema = new mongoose.Schema(
 
     size: [sizeSchema],
   },
-  { _id: false }
+  { _id: false },
 );
 
 export const rentalSchema = new mongoose.Schema(
@@ -117,7 +114,7 @@ export const rentalSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const ProductsSchema = new mongoose.Schema(
@@ -163,10 +160,8 @@ const ProductsSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-export const Products = mongoose.model(
-  "Product",
-  ProductsSchema
-);
+export const Products = mongoose.model("Product", ProductsSchema);
+
