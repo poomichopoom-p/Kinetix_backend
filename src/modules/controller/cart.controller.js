@@ -108,7 +108,8 @@ export const removeProduct = async (req, res, next) => {
   }
 };
 export const getAdditem = async (req, res, next) => {
-  const { _id } = req.params;
+  const { _id } = req.params || {};
+  console.log(_id)
   try {
     const user = await User.findById({_id}).populate("cart.item").select("+cart");
     if (!user) {
