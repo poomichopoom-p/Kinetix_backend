@@ -9,10 +9,12 @@ import { router as categoryRouter } from "./category.router/category.router.js";
 import { router as deliveryAuthRouter } from "./deliveryAuth.router/deliveryAuth.router.js";
 import { router as jobRouter } from "./job.router/job.router.js";
 import { router as rentalsRouter } from "./rentals.router/rentals.router.js";
-import { router as cartRouter } from "./cart.router/cart.router.js";
+import { router as paymentRouter } from "./payment.router/payment.router.js";
+import { router as cartRouter } from "./cart.router/cart-router.js";
 import authUser from "../middleware/authUser.js";
 import isAdmin from "../middleware/isAdmin.js";
 import { adminRouter } from "./admin.router/admin.router.js";
+import { getUserRewards, redeemPoints } from "../modules/controller/user.controller.js";
 
 export const router = Router();
 

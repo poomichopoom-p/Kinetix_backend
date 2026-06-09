@@ -1,5 +1,5 @@
-import { Order } from "../Model/order.model.js";
-
+import { Order } from "../Model/Orders-model.js";
+import { Payment } from "../Model/payment-model.js";
 // POST /api/order/:orderId/pay  — mock payment, no real gateway
 export const mockPayment = async (req, res) => {
   try {
@@ -40,4 +40,23 @@ export const mockPayment = async (req, res) => {
     console.error("Payment error:", err);
     return res.status(500).json({ success: false, message: "Payment failed" });
   }
+};
+
+
+
+const PAYMENT_METHODS = ["card", "promptpay", "wallet"];
+
+export const getPayments = async (req, res, next) => {
+};
+
+export const getPaymentHistory = async (req, res, next) => {
+};
+
+export const getPaymentById = async (req, res, next) => {
+};
+
+export const createPayment = async (req, res, next) => {
+};
+
+export const addPaymentMethod = async (req, res, next) => {
 };
