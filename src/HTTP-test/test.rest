@@ -1,0 +1,7 @@
+
+
+
+
+### see user cart
+GET http://localhost:5000/api/cart/a6a27b82afdd2f75f5401eb8b
+
