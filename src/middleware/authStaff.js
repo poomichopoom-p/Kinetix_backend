@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+/*import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 const authStaff = async (req, res, next) => {
   let token = req.cookies?.accessToken;
@@ -31,3 +31,4 @@ const authStaff = async (req, res, next) => {
 };
 
 export default authStaff;
+*/

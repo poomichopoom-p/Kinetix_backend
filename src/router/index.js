@@ -40,6 +40,7 @@ router.use("/brands", brandRouter); // New route for brands
 router.use("/categories", categoryRouter); // New route for categories
 =======
 router.use("/order", authUser, /*isAdmin,*/ orderRouter);
+router.use("/order", authUser, isAdmin, orderRouter);
 router.use("/shoes", shoeRouter);
 router.use("/brands", brandRouter);
 router.use("/categories", categoryRouter);

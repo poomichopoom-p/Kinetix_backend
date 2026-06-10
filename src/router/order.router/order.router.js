@@ -1,20 +1,30 @@
 import { Router } from "express";
-import { createOrder, getUserOrders, getOrderById } from "../../modules/controller/orders.controller.js";
-<<<<<<< HEAD
-=======
+import {
+    createOrder,
+    getUserOrders,
+    getOrderById,
+    updateOrderStatus
+} from "../../modules/controller/orders.controller.js";
 import { mockPayment } from "../../modules/controller/payment.controller.js";
->>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
 import authUser from "../../middleware/authUser.js";
+import isAdmin from "../../middleware/isAdmin.js";
+
 
 export const orderRouter = Router();
 
+orderRouter.get("/test", (req, res) => {
+    res.json({ success: true, message: "Order router working!" });
+});
+
+// 1. Checkout & Transaction Logs (User Scoped)
 orderRouter.post("/", authUser, createOrder);
 orderRouter.get("/", authUser, getUserOrders);
 orderRouter.get("/:orderId", authUser, getOrderById);
 
-// Mock payment
-<<<<<<< HEAD
-//orderRouter.post("/:orderId/pay", mockPayment);
-=======
+// 2. Transaction Processing Payment Mock Gateway
 orderRouter.post("/:orderId/pay", mockPayment);
->>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
+
+// 3. Administrative Order Lifecycle Management
+orderRouter.put("/:orderId/status", isAdmin, updateOrderStatus);
+//orderRouter.post("/:orderId/pay", mockPayment);
+

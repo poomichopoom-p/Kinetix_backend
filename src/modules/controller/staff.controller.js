@@ -200,13 +200,21 @@ export const staffLogin = async (req, res, next) => {
         .json({ success: false, message: "Wrong password!" });
     }
 
-    const token = jwt.sign(
+    /*const token = jwt.sign(
       { staffId: staff._id },
       process.env.JWT_STAFF_SECRETKEY,
       {
         expiresIn: "2h",
       },
     );
+*/
+
+    const token = jwt.sign(
+      { userId: staff._id },  // ← Must be "userId"
+      process.env.JWT_SECRETKEY,
+      { expiresIn: "2h" }
+    );
+
     const isprod = process.env.NODE_ENV === "production";
 
     res.cookie("accessToken", token, {
