@@ -49,6 +49,7 @@ export const login = async (req, res, next) => {
       .json({ success: false, message: "Email and password are required!" });
   }
   try {
+    // FIX: Match against schema key 'email' instead of variable name 'userEmail'
     const user = await User.findOne({ email: userEmail }).select("+password");
     if (!user) {
       return res
@@ -208,7 +209,60 @@ export const getUserStats = async (req, res, next) => {
         totalRentals,
         activeRentals,
         returnScore,
+        points: req.user.points || 0,
       },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getUserRewards = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    const ranks = {
+      bronze: { next: "silver", nextPoints: 1000 },
+      silver: { next: "gold", nextPoints: 2000 },
+      gold: { next: "platinum", nextPoints: 5000 },
+      platinum: { next: "Diamond", nextPoints: 10000 },
+      Diamond: { next: "Legend", nextPoints: 20000 },
+    };
+
+    const currentRankInfo = ranks[user.userRank] || ranks.bronze;
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        points: user.points || 0,
+        level: user.userRank,
+        nextLevel: currentRankInfo.next,
+        nextLevelPoints: currentRankInfo.nextPoints,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const redeemPoints = async (req, res, next) => {
+  try {
+    const { points } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (user.points < points) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient points",
+      });
+    }
+
+    user.points -= points;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Points redeemed successfully",
+      remaining: user.points,
     });
   } catch (err) {
     next(err);
@@ -293,8 +347,12 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
+<<<<<<< HEAD
+    const user = await User.findById(req.params.id);
+=======
     const userId = getRequestUserId(req);
     const user = await applySelect(User.findById(userId), "-password");
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -302,6 +360,7 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
+    // FIX: Removed duplicate login code block (bcrypt/cookie setting) here
     return res.status(200).json({
       success: true,
       data: sanitizeUser(user),
@@ -331,6 +390,11 @@ export const updateUserById = async (req, res, next) => {
       "phone",
       "avatarUrl",
     ];
+<<<<<<< HEAD
+
+
+=======
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
     const updates = {};
 
     for (const field of allowedFields) {
@@ -412,6 +476,7 @@ export const deleteUserById = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+
 };
 
 
@@ -443,3 +508,21 @@ export const logout = async (req, res, next) => {
     next(err);
   }
 };
+
+
+export const usersLogout = async (req, res) => {
+  const isProd = process.env.NODE_ENV === "production";
+
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: isProd, // only send over HTTPS in production
+    sameSite: isProd ? "none" : "lax",
+    parh: "/",
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "Logout success !",
+  });
+};
+

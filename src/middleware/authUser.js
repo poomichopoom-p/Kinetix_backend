@@ -1,58 +1,6 @@
 import jwt from "jsonwebtoken";
-import { User } from "../modules/Model/user-model.js";
-import { Staff } from "../modules/Model/staff-model.js";
-
-const authUser = async (req, res, next) => {
-  const token = req.cookies?.accessToken;
-
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: "Access denied. No token! Please sign in again",
-    });
-  }
-
-  try {
-    const decodeToken = jwt.verify(token, process.env.JWT_SECRETKEY);
-
-    if (!decodeToken || !decodeToken.userId) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid token structure. Please sign in again",
-      });
-    }
-
-    // Get user role from database
-    let user = await User.findById(decodeToken.userId).select("role");
-
-    // If not in User model, check Staff model
-    if (!user) {
-      user = await Staff.findById(decodeToken.userId).select("role");
-    }
-
-    req.user = {
-      _id: decodeToken.userId,
-      role: user?.role || "user"
-    };
-
-    return next();
-  } catch (err) {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid or expired token. Please sign in again",
-    });
-  }
-};
-
-export default authUser;
-
-/* working very well this one
-
-
-
-import jwt from "jsonwebtoken";
-import { User } from "../modules/Model/user-model.js";   // 🔥 make sure this import is here
-
+import cookieParser from "cookie-parser";
+import { User } from "../modules/Model/users-model.js";
 const authUser = async (req, res, next) => {
   // 1. Try cookie first, then Authorization header
   let token = req.cookies?.accessToken;
@@ -69,22 +17,16 @@ const authUser = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRETKEY);
-
-    if (!decoded?.userId) {
+    const decodeToken = jwt.verify(token, process.env.JWT_SECRETKEY);
+    const user = await User.findById(decodeToken.userId);
+    if (!user) {
       return res.status(401).json({
         success: false,
-        message: "Invalid token structure. Please sign in again",
+        message: "User not found. please signIn again",
       });
     }
-
-    const user = await User.findById(decoded.userId).select("role");
-    req.user = {
-      _id: decoded.userId,
-      role: user?.role || "user",
-    };
-
-    next();
+    req.user = user;
+    return next();
   } catch (err) {
     return res.status(401).json({
       success: false,
@@ -94,4 +36,4 @@ const authUser = async (req, res, next) => {
 };
 
 export default authUser;
-*/
+

@@ -26,3 +26,5 @@ orderRouter.post("/:orderId/pay", mockPayment);
 
 // 3. Administrative Order Lifecycle Management
 orderRouter.put("/:orderId/status", isAdmin, updateOrderStatus);
+//orderRouter.post("/:orderId/pay", mockPayment);
+

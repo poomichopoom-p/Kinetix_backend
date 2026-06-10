@@ -1,4 +1,9 @@
+<<<<<<< HEAD
+import mongoose from "mongoose";
+import { Brand } from "../Model/Brand-model.js";
+=======
 import { Brand } from "../Model/Brand.model.js";
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
 import { Products } from "../Model/products-model.js";
 
 export const getProduct = async (req, res, next) => {
@@ -58,6 +63,29 @@ export const createProduct = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       message: "Product created successfully!",
+      data: doc,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateProduct = async (req, res, next) => {
+  const { id } = req.params;
+  const updates = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid product ID" });
+  }
+
+  try {
+    const doc = await Products.findByIdAndUpdate(id, updates, { new: true });
+    if (!doc) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+    return res.status(200).json({
+      success: true,
+      message: "Product updated successfully",
       data: doc,
     });
   } catch (err) {
@@ -133,9 +161,15 @@ export const getCategory = async (req, res, next) => {
   try {
     const doc = await Products.find({ category });
     if (!doc) {
+<<<<<<< HEAD
+      return res.status(404).json({
+        success: false,
+        message: "category not found!",
+=======
       return res.status(400).json({
         success: false,
         message: "some thing worng category not found!",
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
       });
     }
     return res
@@ -150,7 +184,11 @@ export const allBand = async (req, res, next) => {
   try {
     const doc = await Brand.find();
     if (!doc) {
+<<<<<<< HEAD
+      return res.status(500).json({
+=======
       return res.status(400).json({
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
         success: false,
         message: "some thing worng Product not found!",
       });
@@ -164,6 +202,41 @@ export const allBand = async (req, res, next) => {
 };
 
 export const deleteProduct = async (req, res, next) => {
+<<<<<<< HEAD
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid ID format" });
+  }
+
+  try {
+    const doc = await Products.findByIdAndDelete(id);
+    if (!doc) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+    return res.status(200).json({ success: true, message: "Product deleted successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /api/shoes/:id
+export const getShoeById = async (req, res, next) => {
+   const { id } = req.params || {};
+
+  // Reject malformed IDs before hitting the database
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid shoe ID" });
+  }
+
+  try {
+    const doc = await Products.findById(id);
+    if (!doc) {
+      return res.status(404).json({ success: false, message: "Product not found!" });
+    }
+
+    return res.status(200).json({ success: true, data: shoe, message:" Success!" });
+=======
   const { id } = req.params || {};
 
   if (!id) {
@@ -176,6 +249,7 @@ export const deleteProduct = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Product not found!" });
     }
     return res.status(200).json({ success: true, message: "Product deleted successfully!" });
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
   } catch (err) {
     next(err);
   }

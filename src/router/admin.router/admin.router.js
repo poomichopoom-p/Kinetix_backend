@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+// router/admin.router.js
+=======
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
 import { Router } from "express";
 import authUser from "../../middleware/authUser.js";
 import isAdmin from "../../middleware/isAdmin.js";
@@ -10,9 +14,12 @@ export const adminRouter = Router();
 
 adminRouter.use(authUser, isAdmin);
 
+<<<<<<< HEAD
+=======
 adminRouter.get("/test", (req, res) => {
     res.json({ success: true, message: "Admin router working!" });
 });
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
 
 // UPDATED: Get dashboard stats
 adminRouter.get("/stats", async (req, res, next) => {
