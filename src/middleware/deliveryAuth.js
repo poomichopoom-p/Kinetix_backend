@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+/*import jwt from "jsonwebtoken";
 
 const deliveryAuth = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -16,3 +16,4 @@ const deliveryAuth = (req, res, next) => {
 };
 
 export default deliveryAuth;
+*/
