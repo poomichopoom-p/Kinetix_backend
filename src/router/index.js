@@ -6,8 +6,8 @@ import { orderRouter as orderRouter } from "./order.router/order.router.js";
 import { router as brandRouter } from "./brand.router/brand.router.js";
 import { router as shoeRouter } from "./shoe.router/shoe.router.js";
 import { router as categoryRouter } from "./category.router/category.router.js"; // New import
-import { router as deliveryAuthRouter } from "./deliveryAuth.router/deliveryAuth.router.js";
-import { router as jobRouter } from "./job.router/job.router.js";
+// import { router as deliveryAuthRouter } from "./deliveryAuth.router/deliveryAuth.router.js";
+// import { router as jobRouter } from "./job.router/job.router.js";
 import { router as rentalsRouter } from "./rentals.router/rentals.router.js";
 import { router as paymentRouter } from "./payment.router/payment.router.js";
 import { router as cartRouter } from "./cart.router/cart-router.js";

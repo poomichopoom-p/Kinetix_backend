@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
-import { User } from "../modules/Model/users-model.js";
+import { User } from "../modules/Model/user-model.js";
 const authUser = async (req, res, next) => {
   // 1. Try cookie first, then Authorization header
   let token = req.cookies?.accessToken;
