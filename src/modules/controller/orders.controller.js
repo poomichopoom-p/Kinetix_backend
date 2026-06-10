@@ -1,6 +1,33 @@
 import mongoose from "mongoose";
 import { Orders } from "../Model/Orders-model.js";
 
+// Shapes a Waiwai order (single `item`) into the `{ items: [...] }` array
+// shape the frontend dashboard expects.
+const formatOrderForFrontend = (order) => {
+  const product = order.item?.ProductId;
+  const variant = product?.variants?.find(
+    (v) => v.skuColorCode === order.item?.sku_color_code,
+  );
+
+  return {
+    _id: order._id,
+    status: order.status,
+    createdAt: order.ordered_at,
+    items: order.item
+      ? [
+          {
+            brand: product?.brandId?.brandName || "",
+            name: product?.modelName || "",
+            image: variant?.images?.[0] || "",
+            size: variant?.size?.[0]?.size,
+            rentalFee: order.item.rental_plan?.["1day"] || 0,
+            rentalDays: 1,
+          },
+        ]
+      : [],
+  };
+};
+
 export const getOrder = async (req, res, next) => {
   try {
     const doc = await Orders.find();
@@ -30,12 +57,17 @@ export const getUserOrders = async (req, res, next) => {
     const orders = await Orders.find({
       customerId: req.user._id,
       is_active: true,
-    });
+    })
+      .populate({
+        path: "item.ProductId",
+        populate: { path: "brandId" },
+      })
+      .lean();
 
     return res.status(200).json({
       success: true,
       message: "Get user orders successful",
-      data: orders,
+      data: orders.map(formatOrderForFrontend),
     });
   } catch (err) {
     next(err);

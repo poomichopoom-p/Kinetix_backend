@@ -36,6 +36,12 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
     password: { type: String, trim: true, minlength: 8, select: false },
     address: { type: String, minlength: 10, select: true },
     phone: { type: String, trim: true, select: true },
