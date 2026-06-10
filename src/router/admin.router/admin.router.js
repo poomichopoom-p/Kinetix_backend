@@ -1,4 +1,3 @@
-// router/admin.router.js
 import { Router } from "express";
 import authUser from "../../middleware/authUser.js";
 import isAdmin from "../../middleware/isAdmin.js";
@@ -11,6 +10,9 @@ export const adminRouter = Router();
 
 adminRouter.use(authUser, isAdmin);
 
+adminRouter.get("/test", (req, res) => {
+    res.json({ success: true, message: "Admin router working!" });
+});
 
 adminRouter.get("/orders", async (req, res, next) => {
     try {

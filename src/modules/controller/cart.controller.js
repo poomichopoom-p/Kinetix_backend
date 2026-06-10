@@ -1,4 +1,4 @@
-import { Cart } from "../Model/cart.model.js";
+import { Cart } from "../Model/Cart.model.js";
 
 // GET /api/cart/:_id
 export const getCart = async (req, res) => {

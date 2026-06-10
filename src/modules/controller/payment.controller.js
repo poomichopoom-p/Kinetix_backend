@@ -1,4 +1,4 @@
-import { Order } from "../Model/order.model.js";
+import { Order } from "../Model/Orders-model.js";
 
 // POST /api/order/:orderId/pay  — mock payment, no real gateway
 export const mockPayment = async (req, res) => {
