@@ -11,11 +11,15 @@ export const createJob = async (req, res, next) => {
   const { jobType, driverId } = req.body || {};
 
   if (!["DELIVERY", "RETURN"].includes(jobType)) {
-    return res.status(400).json({ message: "jobType must be DELIVERY or RETURN" });
+    return res
+      .status(400)
+      .json({ message: "jobType must be DELIVERY or RETURN" });
   }
 
   const initialStatus =
-    jobType === "DELIVERY" ? "WAITING_FOR_ADMIN_CONFIRMATION" : "WAITING_FOR_RETURN_APPROVAL";
+    jobType === "DELIVERY"
+      ? "WAITING_FOR_ADMIN_CONFIRMATION"
+      : "WAITING_FOR_RETURN_APPROVAL";
 
   try {
     const job = await Job.create({
@@ -28,7 +32,7 @@ export const createJob = async (req, res, next) => {
     // Notify admins of new job
     notificationService
       .sendForTransition({ job, oldStatus: null, newStatus: initialStatus })
-      .catch(() => {});
+      .catch(() => { });
 
     return res.status(201).json({ data: job });
   } catch (err) {
@@ -58,7 +62,9 @@ export const getJobs = async (req, res, next) => {
       Job.countDocuments(filter),
     ]);
 
-    return res.status(200).json({ total, page: Number(page), limit: Number(limit), data: jobs });
+    return res
+      .status(200)
+      .json({ total, page: Number(page), limit: Number(limit), data: jobs });
   } catch (err) {
     next(err);
   }
@@ -102,20 +108,33 @@ export const getJobTimeline = async (req, res, next) => {
 // ── NOTIFICATIONS ──────────────────────────────────────────────────────────────
 
 export const getMyNotifications = async (req, res, next) => {
+  const { _id } = req.params || {};
+  if (!_id) {
+    return res.status(401).json({ success: true, message: "Id Requied!" });
+  }
   try {
-    const notifications = await Notification.find({ userId: req.user._id })
+    const notifications = await Notification.findById({ _id })
       .sort({ createdAt: -1 })
       .limit(50);
+    if (!notifications) {
+      return res
+        .status(401)
+        .json({ success: false, message: "No notification Id!", Error: err });
+    }
+
+    console.log(notifications);
     return res.status(200).json({ data: notifications });
   } catch (err) {
     next(err);
   }
 };
-
+//bug
 export const markNotificationRead = async (req, res, next) => {
   try {
     await Notification.updateMany({ userId: req.user._id }, { isRead: true });
-    return res.status(200).json({ message: "All notifications marked as read" });
+    return res
+      .status(200)
+      .json({ message: "All notifications marked as read" });
   } catch (err) {
     next(err);
   }
@@ -139,38 +158,43 @@ const makeTransitionHandler = (newStatus) => async (req, res, next) => {
     });
     return res.status(200).json({ data: updatedJob });
   } catch (err) {
-    if (err.status) return res.status(err.status).json({ message: err.message });
+    if (err.status)
+      return res.status(err.status).json({ message: err.message });
     next(err);
   }
 };
 
 // ── DELIVERY FLOW ──────────────────────────────────────────────────────────────
-export const adminConfirm       = makeTransitionHandler("WAITING_FOR_DRIVER_CONFIRMATION");
-export const driverConfirm      = makeTransitionHandler("DRIVER_CONFIRMED");
-export const pickup             = makeTransitionHandler("PICKED_UP");
-export const inTransit          = makeTransitionHandler("IN_TRANSIT");
-export const complete           = makeTransitionHandler("DELIVERED");
+export const adminConfirm = makeTransitionHandler("WAITING_FOR_DRIVER_CONFIRMATION");
+export const driverConfirm = makeTransitionHandler("DRIVER_CONFIRMED");
+export const pickup = makeTransitionHandler("PICKED_UP");
+export const inTransit = makeTransitionHandler("IN_TRANSIT");
+export const complete = makeTransitionHandler("DELIVERED");
 
 // ── RETURN FLOW ────────────────────────────────────────────────────────────────
-export const returnApprove      = makeTransitionHandler("RETURN_DRIVER_PENDING");
+export const returnApprove = makeTransitionHandler("RETURN_DRIVER_PENDING");
 export const returnDriverConfirm = makeTransitionHandler("RETURN_DRIVER_CONFIRMED");
-export const returnPickup       = makeTransitionHandler("RETURN_PICKED_UP");
-export const returnInTransit    = makeTransitionHandler("RETURN_IN_TRANSIT");
-export const returnComplete     = makeTransitionHandler("RETURN_COMPLETED");
+export const returnPickup = makeTransitionHandler("RETURN_PICKED_UP");
+export const returnInTransit = makeTransitionHandler("RETURN_IN_TRANSIT");
+export const returnComplete = makeTransitionHandler("RETURN_COMPLETED");
 
 // ── REJECT FLOW ────────────────────────────────────────────────────────────────
-export const reject             = makeTransitionHandler("REJECT_REQUESTED");
+export const reject = makeTransitionHandler("REJECT_REQUESTED");
 export const rejectDriverConfirm = makeTransitionHandler("REJECT_DRIVER_CONFIRMED");
-export const rejectApprove      = makeTransitionHandler("REJECT_APPROVED");
+export const rejectApprove = makeTransitionHandler("REJECT_APPROVED");
 
 // ── CUSTOMER REJECT FLOW ───────────────────────────────────────────────────────
-export const customerReject            = makeTransitionHandler("CUSTOMER_REJECTED");
+export const customerReject = makeTransitionHandler("CUSTOMER_REJECTED");
 export const customerRejectAcknowledge = makeTransitionHandler("CUSTOMER_REJECT_ACKNOWLEDGED");
-export const customerRejectComplete    = makeTransitionHandler("CUSTOMER_REJECT_COMPLETED");
+export const customerRejectComplete = makeTransitionHandler("CUSTOMER_REJECT_COMPLETED");
 
 // ── CANCELLATION FLOW ─────────────────────────────────────────────────────────
-export const requestCancellation = makeTransitionHandler("CANCELLATION_REQUESTED");
-export const approveCancellation = makeTransitionHandler("CANCELLATION_APPROVED");
+export const requestCancellation = makeTransitionHandler(
+  "CANCELLATION_REQUESTED",
+);
+export const approveCancellation = makeTransitionHandler(
+  "CANCELLATION_APPROVED",
+);
 
 // ── FILE UPLOAD ────────────────────────────────────────────────────────────────
 export const uploadProof = async (req, res, next) => {
@@ -186,7 +210,7 @@ export const uploadProof = async (req, res, next) => {
     const job = await Job.findByIdAndUpdate(
       id,
       { proofOfDeliveryImage: req.file.path },
-      { new: true },
+      { returnDocument: "after" },
     );
     if (!job) return res.status(404).json({ message: "Job not found" });
     return res.status(200).json({ data: job });
