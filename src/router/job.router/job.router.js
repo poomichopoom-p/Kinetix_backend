@@ -1,4 +1,4 @@
-import { Router } from "express";
+/*import { Router } from "express";
 import deliveryAuth from "../../middleware/deliveryAuth.js";
 import { requireRole } from "../../middleware/rbac.js";
 import { upload } from "../../middleware/upload.js";
@@ -66,3 +66,4 @@ router.patch("/:id/request-cancellation", requireRole("USER"), requestCancellati
 router.patch("/:id/approve-cancellation", requireRole("ADMIN"), approveCancellation);
 
 router.patch("/:id/upload-proof", requireRole("DRIVER"), upload.single("proof"), uploadProof);
+*/

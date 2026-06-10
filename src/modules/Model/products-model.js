@@ -39,6 +39,7 @@ const variantSchema = new mongoose.Schema(
 
     size: [sizeSchema],
   },
+<<<<<<< HEAD
   { _id: false },
 );
 
@@ -62,6 +63,19 @@ export const rentalSchema = new mongoose.Schema(
   { _id: false },
 );
 
+=======
+  colorName: { type: String, required: true },
+  images: [{ type: String }],
+  size: [sizeSchema],
+});
+export const rentalSchema = new mongoose.Schema({
+
+  "1day": { type: Number, required: true },
+  "3day": { type: Number, required: true },
+  "7day": { type: Number, required: true },
+
+});
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
 const ProductsSchema = new mongoose.Schema(
   {
     modelName: {

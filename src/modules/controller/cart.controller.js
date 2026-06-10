@@ -1,4 +1,5 @@
 import { Cart } from "../Model/Cart.model.js";
+<<<<<<< HEAD
 import {User} from "../Model/user-model.js"
 
 // GET /api/cart/:_id
@@ -29,11 +30,36 @@ export const addToCart = async (req, res) => {
        let cart = await User.findOne({ userId: req.params._id });
     if (!cart) cart = new Cart({ userId: req.params._id, items: [] });
 
+=======
+
+// GET /api/cart/:_id
+export const getCart = async (req, res) => {
+  try {
+    const cart = await Cart.findOne({ userId: req.params._id });
+    return res.status(200).json({ success: true, data: cart?.items || [] });
+  } catch (err) {
+    console.error("Get cart error:", err);
+    return res.status(500).json({ success: false, message: "Cannot load cart" });
+  }
+};
+
+// POST /api/cart/addItem/:_id
+export const addToCart = async (req, res) => {
+  try {
+    const { item, name, image, price, skuColorCode, size, quantity } = req.body;
+
+    let cart = await Cart.findOne({ userId: req.params._id });
+    if (!cart) cart = new Cart({ userId: req.params._id, items: [] });
+
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
     const existing = cart.items.find(
       (i) => i.item.toString() === item && i.skuColorCode === skuColorCode && i.size === size
     );
 
+<<<<<<< HEAD
     
+=======
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
     if (existing) {
       existing.quantity += quantity || 1;
     } else {
@@ -43,6 +69,7 @@ export const addToCart = async (req, res) => {
     cart.updatedAt = new Date();
     await cart.save();
 
+<<<<<<< HEAD
     if (!selectedSize) {
       return res.status(404).json({
         success: false,
@@ -115,9 +142,35 @@ export const removeProduct = async (req, res, next) => {
     }
 
     return res.status(200).json({ success: true, message: "Item removed from cart", data: user.cart });
+=======
+    return res.status(200).json({ success: true, data: cart.items });
   } catch (err) {
-    next(err);
+    console.error("Add to cart error:", err);
+    return res.status(500).json({ success: false, message: "Cannot add to cart" });
   }
+};
+
+// DELETE /api/cart/removeItem/:_id
+export const removeFromCart = async (req, res) => {
+  try {
+    const { item, skuColorCode, size } = req.body;
+
+    const cart = await Cart.findOne({ userId: req.params._id });
+    if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
+
+    cart.items = cart.items.filter(
+      (i) => !(i.item.toString() === item && i.skuColorCode === skuColorCode && i.size === size)
+    );
+    cart.updatedAt = new Date();
+    await cart.save();
+
+    return res.status(200).json({ success: true, data: cart.items });
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
+  } catch (err) {
+    console.error("Remove from cart error:", err);
+    return res.status(500).json({ success: false, message: "Cannot remove item" });
+  }
+<<<<<<< HEAD
 };
 export const getAdditem = async (req, res, next) => {
   const { _id } = req.params || {};
@@ -218,4 +271,6 @@ export const deleteItem = async (req, res, next) => {
     console.error("Remove from cart error:", err);
     return res.status(500).json({ success: false, message: "Cannot remove item" });
   }
+=======
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
 };

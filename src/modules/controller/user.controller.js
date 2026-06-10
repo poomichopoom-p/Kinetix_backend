@@ -199,9 +199,9 @@ export const getUserStats = async (req, res, next) => {
       totalRentals === 0
         ? 100
         : Math.max(
-            0,
-            Math.round(((totalRentals - returned) / totalRentals) * 100),
-          );
+          0,
+          Math.round(((totalRentals - returned) / totalRentals) * 100),
+        );
 
     return res.status(200).json({
       success: true,
@@ -347,7 +347,12 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
+<<<<<<< HEAD
     const user = await User.findById(req.params.id);
+=======
+    const userId = getRequestUserId(req);
+    const user = await applySelect(User.findById(userId), "-password");
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -385,8 +390,11 @@ export const updateUserById = async (req, res, next) => {
       "phone",
       "avatarUrl",
     ];
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
     const updates = {};
 
     for (const field of allowedFields) {
@@ -420,7 +428,6 @@ export const updateUserById = async (req, res, next) => {
     // สำคัญมากถ้ามี pre("save") สำหรับ hash password
     const userId = getRequestUserId(req);
     const user = await applySelect(User.findById(userId), "+password");
-
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -454,7 +461,6 @@ export const deleteUserById = async (req, res, next) => {
 
     const userId = getRequestUserId(req);
     const user = await User.findByIdAndDelete(userId);
-
     if (!user) {
       return res.status(404).json({
         success: false,

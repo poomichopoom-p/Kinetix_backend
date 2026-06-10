@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
+<<<<<<< HEAD
 import { Shoe } from "../Model/shoue-model.js";
+=======
+import { Shoe } from "../Model/shoe-model.js";
+>>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
 import { Products } from "../Model/products-model.js";
 // GET /api/shoes/:id
 export const getShoeById = async (req, res, next) => {

@@ -177,8 +177,8 @@ export const deleteStaffById = async (req, res, next) => {
 export const staffLogin = async (req, res, next) => {
   const { email, password } = req.body || {};
   const staffEmail = String(email || "")
-  .trim()
-  .toLowerCase();
+    .trim()
+    .toLowerCase();
   if (!staffEmail || !password) {
     return res
       .status(400)
