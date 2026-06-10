@@ -210,11 +210,7 @@ export const uploadProof = async (req, res, next) => {
     const job = await Job.findByIdAndUpdate(
       id,
       { proofOfDeliveryImage: req.file.path },
-<<<<<<< HEAD
       { returnDocument: "after" },
-=======
-      { returnDocument: 'after' },
->>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
     );
     if (!job) return res.status(404).json({ message: "Job not found" });
     return res.status(200).json({ data: job });
