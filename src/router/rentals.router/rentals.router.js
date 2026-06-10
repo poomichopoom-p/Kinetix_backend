@@ -4,13 +4,13 @@ import {
   getPrebooking,
   getRentalTracking,
   getRentalHistory,
-  exportRentalHistory,
+  // RentalHistory,
 } from "../../modules/controller/orders.controller.js";
 
 export const router = Router();
 
 router.get("/active", getActiveRentals);
 router.get("/history", getRentalHistory);
-router.get("/history/export", exportRentalHistory);
+// router.get("/history/export", RentalHistory);
 router.get("/prebooking", getPrebooking);
 router.get("/:id/tracking", getRentalTracking);

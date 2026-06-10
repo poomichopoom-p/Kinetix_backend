@@ -387,8 +387,6 @@ export const updateUserById = async (req, res, next) => {
     ];
 
 
-    const allowedFields = ["name", "surname", "email", "password", "address"];
-
     const updates = {};
 
     for (const field of allowedFields) {

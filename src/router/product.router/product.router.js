@@ -9,6 +9,7 @@ import {
   getCategory,
   allBand,
   deleteProduct,
+  getShoeById,
 } from "../../modules/controller/products.controller.js";
 
 export const router = Router();

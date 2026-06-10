@@ -12,6 +12,16 @@ export const getCart = async (req, res) => {
   }
 };
 
+export const addItem = async (req, res, next) => {
+  const { item, skuColorCode, size, quantity } = req.body || {};
+  const { userId } = req.params;
+  if (!item || !skuColorCode || !size || !quantity) {
+    return res.status(400).json({
+      success: false,
+      message: "Incomplete information provided.",
+    });
+  }
+}
 // POST /api/cart/addItem/:_id
 export const addToCart = async (req, res) => {
   try {

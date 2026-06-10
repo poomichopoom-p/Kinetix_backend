@@ -150,3 +150,52 @@ export const getRentalTracking = async (req, res, next) => {
     next(err);
   }
 };
+
+
+export const getRentalHistory = async (req, res, next) => {
+  try {
+    const { q, brand, page = 1, limit = 5 } = req.query;
+    const query = {
+      customerId: req.user._id,
+      status: { $in: ["Done", "successful", "Fail"] },
+    };
+
+    if (q) {
+      // Note: This is a simplified search. In a real app, you might join with Products
+      // but here we just check if it matches some mock criteria or simplified fields.
+      // For now, let's keep it simple.
+    }
+
+    if (brand && brand !== "All") {
+      // query["item.brand"] = brand; // Needs model update if brand is stored in order item
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const total = await Orders.countDocuments(query);
+    const orders = await Orders.find(query)
+      .populate("item.ProductId")
+      .sort({ ordered_at: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    // Map to the format frontend expects
+    const formattedData = orders.map((o) => ({
+      brand: o.item.ProductId?.brand || "Unknown",
+      model: o.item.ProductId?.modelName || "Unknown Shoe",
+      size: o.item.ProductId?.variants?.[0]?.size?.[0]?.size || 42,
+      dateRange: `${new Date(o.ordered_at).toLocaleDateString()} - ${new Date(o.delivery_date).toLocaleDateString()}`,
+      days: 7,
+      price: o.item.deposit_amount || 0,
+      status: o.status === "Done" ? "Returned" : o.status,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: formattedData,
+      total,
+      page: parseInt(page),
+    });
+  } catch (err) {
+    next(err);
+  }
+};
