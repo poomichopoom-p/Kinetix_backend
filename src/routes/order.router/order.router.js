@@ -8,6 +8,7 @@ import {
   getActiveRentals,
   getPrebooking,
   getRentalTracking,
+  getOrderById,
 } from "../../modules/controller/orders.controller.js";
 import authUser from "../../middleware/authUser.js";
 import isAdmin from "../../middleware/isAdmin.js";
@@ -21,6 +22,9 @@ router.get("/prebooking", getPrebooking);
 router.get("/:id/tracking", getRentalTracking);
 
 router.post("/create-order", authUser, newOrder);
+
+// GET /api/orders/:id
+router.get("/:id", authUser, getOrderById);
 
 // DELETE /api/order/:id
 router.delete("/:id", authUser, isAdmin, deleteOrder);

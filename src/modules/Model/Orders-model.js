@@ -32,12 +32,31 @@ const OrdersItem = new mongoose.Schema({
   deposit_amount: { type: Number, required: true },
 });
 
+const orderItemSchema = new mongoose.Schema(
+  {
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+    name: { type: String },
+    image: { type: String },
+    price: { type: Number },
+    size: { type: mongoose.Schema.Types.Mixed },
+    quantity: { type: Number, default: 1 },
+    rentalDays: { type: Number },
+    rentalFee: { type: Number },
+    deposit: { type: Number },
+  },
+  { _id: false }
+);
+
 const orderSchema = new mongoose.Schema({
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
+  items: [orderItemSchema],
+  totalRental: { type: Number },
+  totalDeposit: { type: Number },
+  grandTotal: { type: Number },
   shippingStatus: {
     type: String,
     enum: ["preparing", "shipped", "delivered", "returning", "Waiting", "successful", "Fail", "Done"],
@@ -61,6 +80,6 @@ const orderSchema = new mongoose.Schema({
   canceled_at: { type: Date },
   // soft delete flag — false means the order is deactivated, not physically removed
   is_active: { type: Boolean, default: true },
-});
+}, { timestamps: true });
 
 export const Orders = mongoose.model("order", orderSchema);

@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { Orders } from "../Model/Orders-model.js";
+import { User } from "../Model/users-model.js";
+import { Products } from "../Model/products-model.js";
 
 export const getOrder = async (req, res, next) => {
   try {
@@ -19,10 +21,105 @@ export const getOrder = async (req, res, next) => {
 };
 
 export const newOrder = async (req, res, next) => {
-  return res.status(501).json({
-    success: false,
-    message: "Create order API is not implemented yet",
-  });
+  try {
+    const { items, totalRental, totalDeposit, grandTotal } = req.body || {};
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, message: "Order must contain at least one item" });
+    }
+
+    const order = await Orders.create({
+      customerId: req.user._id,
+      items: items.map((item) => ({
+        productId: item.productId,
+        name: item.name,
+        image: item.image,
+        price: item.price,
+        size: item.size,
+        quantity: item.quantity || 1,
+        rentalDays: item.rentalDays,
+        rentalFee: item.rentalFee,
+        deposit: item.deposit,
+      })),
+      totalRental,
+      totalDeposit,
+      grandTotal,
+      status: "successful",
+    });
+
+    // Empty the cart now that its items have been turned into an order
+    await User.findByIdAndUpdate(req.user._id, { cart: [] });
+
+    // Record each item as an active rental so it shows up in the dashboard's
+    // "Total Rentals" / "Active Rentals" stats and order history (rental_histories collection)
+    const products = await Products.find({
+      _id: { $in: items.map((item) => item.productId).filter(Boolean) },
+    }).populate("brandId");
+    const productById = new Map(products.map((p) => [p._id.toString(), p]));
+
+    const now = new Date();
+    const rentalHistories = items.map((item) => {
+      const product = productById.get(String(item.productId));
+      const planDays = item.rentalDays || 1;
+      const endDate = new Date(now.getTime() + planDays * 24 * 60 * 60 * 1000);
+
+      return {
+        userId: req.user._id,
+        orderId: order._id,
+        status: "active",
+        shoeSnapshot: {
+          brand: product?.brandId?.brandName || "",
+          modelName: item.name,
+          imageUrl: item.image,
+          size: item.size,
+        },
+        pricing: {
+          rentalFee: item.rentalFee,
+          deposit: item.deposit,
+          lateDays: 0,
+        },
+        rentalPeriod: {
+          startDate: now,
+          endDate,
+          planDays,
+        },
+        createdAt: now,
+      };
+    });
+
+    if (rentalHistories.length > 0) {
+      await mongoose.connection.db.collection("rental_histories").insertMany(rentalHistories);
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: "Order created successfully",
+      orderId: order._id,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /api/orders/:id — fetch a single order belonging to the logged-in user
+export const getOrderById = async (req, res, next) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid order ID" });
+  }
+
+  try {
+    const order = await Orders.findOne({ _id: id, customerId: req.user._id });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    return res.status(200).json({ success: true, data: order });
+  } catch (err) {
+    next(err);
+  }
 };
 
 // rental_histories.status -> the status values the dashboard groups by
