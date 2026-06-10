@@ -1,33 +1,6 @@
 import mongoose from "mongoose";
 import { Orders } from "../Model/Orders-model.js";
 
-// Shapes a Waiwai order (single `item`) into the `{ items: [...] }` array
-// shape the frontend dashboard expects.
-const formatOrderForFrontend = (order) => {
-  const product = order.item?.ProductId;
-  const variant = product?.variants?.find(
-    (v) => v.skuColorCode === order.item?.sku_color_code,
-  );
-
-  return {
-    _id: order._id,
-    status: order.status,
-    createdAt: order.ordered_at,
-    items: order.item
-      ? [
-          {
-            brand: product?.brandId?.brandName || "",
-            name: product?.modelName || "",
-            image: variant?.images?.[0] || "",
-            size: variant?.size?.[0]?.size,
-            rentalFee: order.item.rental_plan?.["1day"] || 0,
-            rentalDays: 1,
-          },
-        ]
-      : [],
-  };
-};
-
 export const getOrder = async (req, res, next) => {
   try {
     const doc = await Orders.find();
@@ -52,22 +25,44 @@ export const newOrder = async (req, res, next) => {
   });
 };
 
+// rental_histories.status -> the status values the dashboard groups by
+// (ACTIVE_STATUSES = ["Waiting", "successful"], HISTORY_STATUSES = ["Done", "Fail"])
+const RENTAL_STATUS_MAP = {
+  active: "successful",
+  reserved: "Waiting",
+  late: "successful",
+  returned: "Done",
+  cancelled: "Fail",
+};
+
 export const getUserOrders = async (req, res, next) => {
   try {
-    const orders = await Orders.find({
-      customerId: req.user._id,
-      is_active: true,
-    })
-      .populate({
-        path: "item.ProductId",
-        populate: { path: "brandId" },
-      })
-      .lean();
+    const histories = await mongoose.connection.db
+      .collection("rental_histories")
+      .find({ userId: req.user._id })
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    const data = histories.map((h) => ({
+      _id: h._id,
+      status: RENTAL_STATUS_MAP[h.status] || h.status,
+      createdAt: h.rentalPeriod?.startDate || h.createdAt,
+      items: [
+        {
+          brand: h.shoeSnapshot?.brand || "",
+          name: h.shoeSnapshot?.modelName || "",
+          image: h.shoeSnapshot?.imageUrl || "",
+          size: h.shoeSnapshot?.size,
+          rentalFee: h.pricing?.rentalFee || 0,
+          rentalDays: h.rentalPeriod?.planDays || 1,
+        },
+      ],
+    }));
 
     return res.status(200).json({
       success: true,
       message: "Get user orders successful",
-      data: orders.map(formatOrderForFrontend),
+      data,
     });
   } catch (err) {
     next(err);

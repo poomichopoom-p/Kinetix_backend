@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import { User } from "../Model/users-model.js";
-import { Orders } from "../Model/Orders-model.js";
 import bcrypt from "bcrypt";
 
 // ถ้าไฟล์นี้อยู่คนละ path ให้ปรับ import เป็น:
@@ -197,25 +197,21 @@ export const getUserProfile = async (req, res, next) => {
 
 export const getUserStats = async (req, res, next) => {
   try {
-    const totalRentals = await Orders.countDocuments({
-      customerId: req.user._id,
-    });
-    const activeRentals = await Orders.countDocuments({
-      customerId: req.user._id,
-      is_active: true,
-      status: { $nin: ["Done", "Fail"] },
-    });
-    const returned = await Orders.countDocuments({
-      customerId: req.user._id,
-      status: { $in: ["returning", "Done", "Fail"] },
-    });
+    const histories = await mongoose.connection.db
+      .collection("rental_histories")
+      .find({ userId: req.user._id })
+      .toArray();
+
+    const totalRentals = histories.length;
+    const activeRentals = histories.filter((h) =>
+      ["active", "reserved", "late"].includes(h.status),
+    ).length;
+    const returned = histories.filter((h) => h.status === "returned");
+    const onTimeReturns = returned.filter((h) => !h.pricing?.lateDays);
     const returnScore =
-      totalRentals === 0
+      returned.length === 0
         ? 100
-        : Math.max(
-            0,
-            Math.round(((totalRentals - returned) / totalRentals) * 100),
-          );
+        : Math.round((onTimeReturns.length / returned.length) * 100);
 
     return res.status(200).json({
       success: true,

@@ -1,12 +1,13 @@
 import { Router } from "express";
 import authStaff from "../../middleware/authStaff.js";
+import authUser from "../../middleware/authUser.js";
 import isAdmin from "../../middleware/isAdmin.js";
 import {
   getAllStaff,
   getStaffById,
   updateStaff,
   registerStaff,
-  deleteStaffById
+  deleteStaffById,
   staffLogin,
 } from "../../modules/controller/staff.controller.js";
 
