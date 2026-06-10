@@ -24,10 +24,9 @@ export const addItem = async (req, res, next) => {
 }
 // POST /api/cart/addItem/:_id
 export const addToCart = async (req, res) => {
+   const { item, name, image, price, skuColorCode, size, quantity } = req.body || {};
   try {
-    const { item, name, image, price, skuColorCode, size, quantity } = req.body || {};
-
-    let cart = await User.findOne({ userId: req.params._id });
+       let cart = await User.findOne({ userId: req.params._id });
     if (!cart) cart = new Cart({ userId: req.params._id, items: [] });
 
     const existing = cart.items.find(
@@ -175,6 +174,26 @@ export const updateItem = async (req, res, next) => {
     }
 
     return res.status(200).json({ success: true, message: "Quantity updated", data: user.cart });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteItem = async (req, res, next) => {
+  const { userId, itemId } = req.params;
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { cart: { _id: itemId } } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    return res.status(200).json({ success: true, message: "Item removed from cart", data: user.cart });
   } catch (err) {
     next(err);
   }
