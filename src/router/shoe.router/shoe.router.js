@@ -7,8 +7,8 @@ import {
     createProduct as createShoe,
     deleteProduct as deleteShoe,
 } from '../../modules/controller/products.controller.js';
-import authUser from '../../middleware/authUser.js'; // Assuming authUser middleware exists
-import authorizeRoles from '../../middleware/authorizeRoles.js'; // Assuming authorizeRoles middleware exists
+import authUser from '../../middleware/authUser.js';
+import authorizeRoles from '../../middleware/authorizeRoles.js';
 
 export const router = Router();
 

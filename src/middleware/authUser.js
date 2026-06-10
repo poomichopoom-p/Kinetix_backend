@@ -1,4 +1,3 @@
-// middleware/authUser.js
 import jwt from "jsonwebtoken";
 import { User } from "../modules/Model/user-model.js";
 import { Staff } from "../modules/Model/staff-model.js";
