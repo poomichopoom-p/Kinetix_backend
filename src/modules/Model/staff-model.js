@@ -20,7 +20,11 @@ const staffSchema = new mongoose.Schema(
       minlength: 4,
       maxlength: 100,
     },
-    address: { type: String, minlength: 6, maxlength: 200 },
+    address: {
+      type: String,
+      minlength: 6,
+      maxlength: 200
+    },
     role: {
       type: String,
       enum: ["staff", "admin"],

@@ -1,121 +1,62 @@
-import mongoose from "mongoose";
+import { Order } from "../Model/Orders-model.js";
 import { Payment } from "../Model/payment-model.js";
+// POST /api/order/:orderId/pay  — mock payment, no real gateway
+export const mockPayment = async (req, res) => {
+  try {
+    const order = await Order.findOne({
+      _id: req.params.orderId,
+      userId: req.user._id,
+    });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    if (order.status !== "pending") {
+      return res.status(400).json({ success: false, message: "Order already processed" });
+    }
+
+    // Simulate payment processing delay
+    await new Promise((r) => setTimeout(r, 1000));
+
+    // Mock: 90% success rate (or always succeed — change to true for demo)
+    const paymentSuccess = true;
+
+    if (!paymentSuccess) {
+      return res.status(402).json({ success: false, message: "Payment declined (mock)" });
+    }
+
+    order.status = "confirmed";
+    await order.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Payment successful",
+      transactionId: `TXN-${Date.now()}`,
+      orderId: order._id,
+      amount: order.grandTotal,
+    });
+  } catch (err) {
+    console.error("Payment error:", err);
+    return res.status(500).json({ success: false, message: "Payment failed" });
+  }
+};
+
+
 
 const PAYMENT_METHODS = ["card", "promptpay", "wallet"];
 
 export const getPayments = async (req, res, next) => {
-  try {
-    const history = await Payment.find({ userId: req.user._id })
-      .sort({ createdAt: -1 })
-      .limit(10);
-
-    const totalPaid = history
-      .filter((payment) => payment.status === "completed")
-      .reduce((sum, payment) => sum + payment.amount, 0);
-
-    const balance = 0;
-    const outstanding = 0;
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        balance,
-        outstanding,
-        methods: PAYMENT_METHODS,
-        recentPayments: history.map((payment) => ({
-          id: payment._id,
-          amount: payment.amount,
-          method: payment.method,
-          status: payment.status,
-          receiptUrl: payment.receiptUrl,
-          createdAt: payment.createdAt,
-        })),
-        totalPaid,
-      },
-    });
-  } catch (err) {
-    next(err);
-  }
 };
 
 export const getPaymentHistory = async (req, res, next) => {
-  try {
-    const history = await Payment.find({ userId: req.user._id }).sort({
-      createdAt: -1,
-    });
-    return res.status(200).json({ success: true, data: history });
-  } catch (err) {
-    next(err);
-  }
 };
 
 export const getPaymentById = async (req, res, next) => {
-  const { id } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ success: false, message: "Invalid payment ID" });
-  }
-
-  try {
-    const payment = await Payment.findOne({ _id: id, userId: req.user._id });
-    if (!payment) {
-      return res.status(404).json({ success: false, message: "Payment not found" });
-    }
-
-    return res.status(200).json({ success: true, data: payment });
-  } catch (err) {
-    next(err);
-  }
 };
 
 export const createPayment = async (req, res, next) => {
-  const { amount, method, status, receiptUrl } = req.body || {};
-
-  if (!amount || !method) {
-    return res.status(400).json({
-      success: false,
-      message: "amount and method are required",
-    });
-  }
-
-  if (!PAYMENT_METHODS.includes(method)) {
-    return res.status(400).json({
-      success: false,
-      message: `Unsupported payment method: ${method}`,
-    });
-  }
-
-  try {
-    const payment = await Payment.create({
-      userId: req.user._id,
-      amount,
-      method,
-      status: status || "completed",
-      receiptUrl,
-    });
-
-    return res.status(201).json({ success: true, data: payment });
-  } catch (err) {
-    next(err);
-  }
 };
 
 export const addPaymentMethod = async (req, res, next) => {
-  const { method } = req.body || {};
-
-  if (!method || !PAYMENT_METHODS.includes(method)) {
-    return res.status(400).json({
-      success: false,
-      message: "Valid payment method is required",
-    });
-  }
-
-  return res.status(201).json({
-    success: true,
-    data: {
-      method,
-      enabled: true,
-      message: `${method} is available for this account`,
-    },
-  });
 };

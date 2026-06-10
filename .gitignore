@@ -7,3 +7,4 @@ src/testHTTP
 .codex/
 backend-5000.log
 live-api-server.*
+HTTP-test/

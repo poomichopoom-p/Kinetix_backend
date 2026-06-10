@@ -1,5 +1,16 @@
-import { Products } from "../Model/products-model.js";
-import { User } from "../Model/users-model.js";
+import { Cart } from "../Model/Cart.model.js";
+import {User} from "../Model/user-model.js"
+
+// GET /api/cart/:_id
+export const getCart = async (req, res) => {
+  try {
+    const cart = await User.findOne({ userId: req.params._id });
+    return res.status(200).json({ success: true, data: cart?.items || [] });
+  } catch (err) {
+    console.error("Get cart error:", err);
+    return res.status(500).json({ success: false, message: "Cannot load cart" });
+  }
+};
 
 export const addItem = async (req, res, next) => {
   const { item, skuColorCode, size, quantity } = req.body || {};
@@ -10,26 +21,27 @@ export const addItem = async (req, res, next) => {
       message: "Incomplete information provided.",
     });
   }
-
-  const quan = Number(quantity);
+}
+// POST /api/cart/addItem/:_id
+export const addToCart = async (req, res) => {
+   const { item, name, image, price, skuColorCode, size, quantity } = req.body || {};
   try {
-    const product = await Products.findById(item);
-    if (!product) {
-      return res.status(404).json({ success: false, message: "Product not found" });
-    }
+       let cart = await User.findOne({ userId: req.params._id });
+    if (!cart) cart = new Cart({ userId: req.params._id, items: [] });
 
-    const variant = product.variants.find(
-      (v) => v.skuColorCode === skuColorCode,
+    const existing = cart.items.find(
+      (i) => i.item.toString() === item && i.skuColorCode === skuColorCode && i.size === size
     );
 
-    if (!variant) {
-      return res.status(404).json({
-        success: false,
-        message: "Color variant not found",
-      });
+    
+    if (existing) {
+      existing.quantity += quantity || 1;
+    } else {
+      cart.items.push({ item, name, image, price, skuColorCode, size, quantity: quantity || 1 });
     }
 
-    const selectedSize = variant.size.find((s) => s.size === size);
+    cart.updatedAt = new Date();
+    await cart.save();
 
     if (!selectedSize) {
       return res.status(404).json({
@@ -108,7 +120,8 @@ export const removeProduct = async (req, res, next) => {
   }
 };
 export const getAdditem = async (req, res, next) => {
-  const { _id } = req.params;
+  const { _id } = req.params || {};
+  console.log(_id)
   try {
     const user = await User.findById({_id}).populate("cart.item").select("+cart");
     if (!user) {
@@ -183,5 +196,26 @@ export const deleteItem = async (req, res, next) => {
     return res.status(200).json({ success: true, message: "Item removed from cart", data: user.cart });
   } catch (err) {
     next(err);
+  }
+};
+
+export const deleteItem = async (req, res, next) => {
+  const { userId, itemId } = req.params;
+
+  try {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { cart: { _id: itemId } } },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    return res.status(200).json({ success: true, message: "Item removed from cart", data: user.cart });
+  } catch (err) {
+    console.error("Remove from cart error:", err);
+    return res.status(500).json({ success: false, message: "Cannot remove item" });
   }
 };

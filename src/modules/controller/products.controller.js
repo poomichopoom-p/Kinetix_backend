@@ -207,7 +207,7 @@ export const deleteProduct = async (req, res, next) => {
 
 // GET /api/shoes/:id
 export const getShoeById = async (req, res, next) => {
-  const { id } = req.params;
+   const { id } = req.params || {};
 
   // Reject malformed IDs before hitting the database
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -215,12 +215,12 @@ export const getShoeById = async (req, res, next) => {
   }
 
   try {
-    const shoe = await Products.findById(id);
-    if (!shoe) {
-      return res.status(404).json({ message: "Shoe not found" });
+    const doc = await Products.findById(id);
+    if (!doc) {
+      return res.status(404).json({ success: false, message: "Product not found!" });
     }
 
-    return res.status(200).json({ success: true, data: shoe });
+    return res.status(200).json({ success: true, data: shoe, message:" Success!" });
   } catch (err) {
     next(err);
   }

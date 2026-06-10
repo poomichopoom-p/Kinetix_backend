@@ -1,44 +1,82 @@
-import mongoose from "mongoose";
-import { Orders } from "../Model/Orders-model.js";
+import { Order } from "../Model/Orders-model.js";
+//import { Cart } from "../Model/cart.model.js";
+import { Products } from "../Model/products-model.js";
 
-export const getOrder = async (req, res, next) => {
+// POST /api/orders — create order from current cart
+export const createOrder = async (req, res) => {
   try {
-    const doc = await Orders.find();
-    if (!doc) {
+    const { items, totalRental, totalDeposit, grandTotal } = req.body;
+
+    if (!items?.length) {
       return res
-        .status(500)
-        .json({ success: true, message: "Order not found!" });
+        .status(400)
+        .json({ success: false, message: "No items in order" });
     }
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Get orders successful!", data: doc });
+    // Create order
+    const order = await Order.create({
+      userId: req.user._id,
+      items,
+      totalRental,
+      totalDeposit,
+      grandTotal,
+    });
+
+    // Clear user's cart after order placed
+    //await Cart.findOneAndUpdate(
+    await Products.findOneAndUpdate(
+      { userId: req.user._id },
+      { items: [], updatedAt: new Date() },
+    );
+
+    return res.status(201).json({
+      success: true,
+      message: "Order placed successfully",
+      orderId: order._id,
+    });
   } catch (err) {
-    next(err);
+    console.error("Create order error:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Cannot place order" });
   }
 };
 
-export const newOrder = async (req, res, next) => {
-  return res.status(501).json({
-    success: false,
-    message: "Create order API is not implemented yet",
-  });
+// GET /api/orders — get all orders for current user
+export const getUserOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ userId: req.user._id }).sort({
+      createdAt: -1,
+    });
+    return res.status(200).json({ success: true, data: orders });
+  } catch (err) {
+    console.error("Get orders error:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Cannot load orders" });
+  }
 };
 
-export const getUserOrders = async (req, res, next) => {
+// GET /api/orders/:orderId — get single order
+export const getOrderById = async (req, res) => {
   try {
-    const orders = await Orders.find({
-      customerId: req.user._id,
-      is_active: true,
+    const order = await Order.findOne({
+      _id: req.params.orderId,
+      userId: req.user._id, // ensure user can only see their own orders
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Get user orders successful",
-      data: orders,
-    });
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    return res.status(200).json({ success: true, data: order });
   } catch (err) {
-    next(err);
+    console.error("Get order error:", err);
+    return res
+      .status(500)
+      .json({ success: false, message: "Cannot load order" });
   }
 };
 
@@ -82,7 +120,9 @@ export const getRentalTracking = async (req, res, next) => {
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ success: false, message: "Invalid rental ID" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid rental ID" });
   }
 
   try {
@@ -92,7 +132,9 @@ export const getRentalTracking = async (req, res, next) => {
     });
 
     if (!order) {
-      return res.status(404).json({ success: false, message: "Rental not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Rental not found" });
     }
 
     return res.status(200).json({
@@ -109,6 +151,10 @@ export const getRentalTracking = async (req, res, next) => {
   }
 };
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> aeb98efb8fa449be3b1d329e8cf92bce610fd3ba
 export const getRentalHistory = async (req, res, next) => {
   try {
     const { q, brand, page = 1, limit = 5 } = req.query;
@@ -156,6 +202,8 @@ export const getRentalHistory = async (req, res, next) => {
     next(err);
   }
 };
+<<<<<<< HEAD
+=======
 
 export const exportRentalHistory = async (req, res, next) => {
   try {
@@ -208,3 +256,4 @@ export const deleteOrder = async (req, res, next) => {
     next(err);
   }
 };
+>>>>>>> aeb98efb8fa449be3b1d329e8cf92bce610fd3ba

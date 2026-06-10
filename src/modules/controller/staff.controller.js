@@ -65,10 +65,14 @@ export const updateStaff = async (req, res, next) => {
   if (is_active !== undefined) updateData.is_active = is_active;
 
   try {
-    const updated = await Staff.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const updated = await Staff.findByIdAndUpdate(
+      id,
+      updateData,
+      {
+        returnDocument: 'after',
+        runValidators: true
+      }
+    );
 
     if (!updated) {
       return res.status(404).json({ message: "Staff not found" });
@@ -214,12 +218,11 @@ export const staffLogin = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Login success!",
-      accessToken: token,
-      staff: {
+      user: {
         _id: staff._id,
         email: staff.email,
         name: staff.name,
-        role: staff.role,
+        role: staff.role === "admin" ? "ADMIN" : staff.role,
       },
     });
   } catch (err) {
