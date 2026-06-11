@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken";
-import cookieParser from "cookie-parser";
 import { User } from "../modules/Model/user-model.js";
+import { Staff } from "../modules/Model/staff-model.js";
+
 const authUser = async (req, res, next) => {
-  // 1. Try cookie first, then Authorization header
   let token = req.cookies?.accessToken;
 
   if (!token && req.headers.authorization?.startsWith("Bearer ")) {
@@ -18,7 +18,10 @@ const authUser = async (req, res, next) => {
 
   try {
     const decodeToken = jwt.verify(token, process.env.JWT_SECRETKEY);
-    const user = await User.findById(decodeToken.userId);
+    let user = await User.findById(decodeToken.userId);
+    if (!user) {
+      user = await Staff.findById(decodeToken.userId);
+    }
     if (!user) {
       return res.status(401).json({
         success: false,

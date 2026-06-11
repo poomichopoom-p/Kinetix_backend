@@ -24,7 +24,7 @@ router.use("/users", usersRouter);
 router.use("/staff", staffRouter);
 router.use("/products", productsRouter);
 router.use("/products/admin", authUser, isAdmin, productsRouter);
-router.use("/orders", authUser, isAdmin, orderRouter);
+router.use("/orders", orderRouter);
 router.use("/shoes", shoeRouter);
 router.use("/brands", brandRouter); // New route for brands
 router.use("/categories", categoryRouter); // New route for categories
