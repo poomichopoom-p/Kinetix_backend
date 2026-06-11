@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { User } from "../Model/users-model.js";
 import bcrypt from "bcrypt";
+import { RANK_THRESHOLDS, getRankForPoints } from "../../utils/rank.js";
 
 // ถ้าไฟล์นี้อยู่คนละ path ให้ปรับ import เป็น:
 // import { User } from "../../modules/users-model.js";
@@ -231,11 +232,11 @@ export const getUserRewards = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
     const ranks = {
-      bronze: { next: "silver", nextPoints: 1000 },
-      silver: { next: "gold", nextPoints: 2000 },
-      gold: { next: "platinum", nextPoints: 5000 },
-      platinum: { next: "Diamond", nextPoints: 10000 },
-      Diamond: { next: "Legend", nextPoints: 20000 },
+      bronze: { next: "silver", nextPoints: RANK_THRESHOLDS[1].points },
+      silver: { next: "gold", nextPoints: RANK_THRESHOLDS[2].points },
+      gold: { next: "platinum", nextPoints: RANK_THRESHOLDS[3].points },
+      platinum: { next: "Diamond", nextPoints: RANK_THRESHOLDS[4].points },
+      Diamond: { next: "Legend", nextPoints: RANK_THRESHOLDS[5].points },
     };
 
     const currentRankInfo = ranks[user.userRank] || ranks.bronze;
@@ -267,6 +268,7 @@ export const redeemPoints = async (req, res, next) => {
     }
 
     user.points -= points;
+    user.userRank = getRankForPoints(user.points);
     await user.save();
 
     return res.status(200).json({

@@ -2,8 +2,8 @@ import { Notification } from "../Model/Notification-model.js";
 import { DeliveryUser } from "../Model/DeliveryUser-model.js";
 
 const notificationService = {
-  async send({ userId, title, message }) {
-    return Notification.create({ userId, title, message });
+  async send({ userId, title, message, userType = "DeliveryUser" }) {
+    return Notification.create({ userId, userType, title, message });
   },
 
   async sendMany(notifications) {

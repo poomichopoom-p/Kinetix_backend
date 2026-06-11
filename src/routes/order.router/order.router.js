@@ -9,6 +9,7 @@ import {
   getPrebooking,
   getRentalTracking,
   getOrderById,
+  updateShippingStatus,
 } from "../../modules/controller/orders.controller.js";
 import authUser from "../../middleware/authUser.js";
 import isAdmin from "../../middleware/isAdmin.js";
@@ -25,6 +26,9 @@ router.post("/create-order", authUser, newOrder);
 
 // GET /api/orders/:id
 router.get("/:id", authUser, getOrderById);
+
+// PATCH /api/orders/:id/shipping-status
+router.patch("/:id/shipping-status", authUser, isAdmin, updateShippingStatus);
 
 // DELETE /api/order/:id
 router.delete("/:id", authUser, isAdmin, deleteOrder);

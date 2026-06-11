@@ -9,6 +9,7 @@ import { router as deliveryAuthRouter } from "./deliveryAuth.router/deliveryAuth
 import { router as jobRouter } from "./job.router/job.router.js";
 import { router as cartRouter } from "./cart.routes/cart-router.js"
 import { router as wishlistRouter } from "./wishlist.routes/wishlist.router.js"
+import { router as notificationRouter } from "./notification.router/notification.router.js"
 import authUser from "../middleware/authUser.js";
 import { getUserRewards, redeemPoints } from "../modules/controller/user.controller.js";
 
@@ -22,6 +23,7 @@ router.use("/rentals", authUser, rentalsRouter);
 router.use("/payments", paymentRouter);
 router.use("/cart", cartRouter);
 router.use("/wishlist", authUser, wishlistRouter);
+router.use("/notifications", authUser, notificationRouter);
 
 // Rewards routes
 router.get("/rewards/points", authUser, getUserRewards);

@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import { Orders } from "../Model/Orders-model.js";
 import { User } from "../Model/users-model.js";
 import { Products } from "../Model/products-model.js";
+import { getRankForPoints } from "../../utils/rank.js";
+import notificationService from "../services/notificationService.js";
 
 export const getOrder = async (req, res, next) => {
   try {
@@ -49,6 +51,25 @@ export const newOrder = async (req, res, next) => {
 
     // Empty the cart now that its items have been turned into an order
     await User.findByIdAndUpdate(req.user._id, { cart: [] });
+
+    // Award reward points for the successful rental: every 25 THB of rental fee = 1 point
+    const earnedPoints = Math.floor((totalRental || 0) / 25);
+    if (earnedPoints > 0) {
+      const user = await User.findById(req.user._id);
+      user.points = (user.points || 0) + earnedPoints;
+      user.userRank = getRankForPoints(user.points);
+      await user.save();
+    }
+
+    // Notify the customer that their order is confirmed and awaiting next-day delivery
+    notificationService
+      .send({
+        userId: order.customerId,
+        userType: "User",
+        title: "คำสั่งเช่าสำเร็จ",
+        message: `หมายเลขออเดอร์ ${order._id} รอจัดส่งในวันถัดไป`,
+      })
+      .catch(() => {});
 
     // Record each item as an active rental so it shows up in the dashboard's
     // "Total Rentals" / "Active Rentals" stats and order history (rental_histories collection)
@@ -114,6 +135,55 @@ export const getOrderById = async (req, res, next) => {
 
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    return res.status(200).json({ success: true, data: order });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// PATCH /api/orders/:id/shipping-status — admin updates the shipping status
+// of an order and notifies the customer
+const SHIPPING_STATUS_MESSAGES = {
+  preparing: "คำสั่งเช่าของคุณกำลังเตรียมจัดส่ง",
+  shipped: "คำสั่งเช่าของคุณถูกจัดส่งแล้ว",
+  delivered: "คำสั่งเช่าของคุณถูกจัดส่งสำเร็จแล้ว",
+  returning: "คำสั่งเช่าของคุณกำลังอยู่ระหว่างการคืนสินค้า",
+};
+
+export const updateShippingStatus = async (req, res, next) => {
+  const { id } = req.params;
+  const { shippingStatus } = req.body || {};
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid order ID" });
+  }
+
+  const allowedStatuses = Orders.schema.path("shippingStatus").enumValues;
+  if (!allowedStatuses.includes(shippingStatus)) {
+    return res.status(400).json({ success: false, message: "Invalid shipping status" });
+  }
+
+  try {
+    const order = await Orders.findByIdAndUpdate(
+      id,
+      { shippingStatus },
+      { new: true },
+    );
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    const message = SHIPPING_STATUS_MESSAGES[shippingStatus];
+    if (message) {
+      await notificationService.send({
+        userId: order.customerId,
+        userType: "User",
+        title: "อัปเดตสถานะการจัดส่ง",
+        message,
+      });
     }
 
     return res.status(200).json({ success: true, data: order });
