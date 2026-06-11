@@ -1,0 +1,65 @@
+@baseUrl = http://localhost:5000
+@productId = 662b8f1e3c5a4b1a2c9d8e7f
+@brandName = Nike
+@categoryName = Running
+@jwtToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJhMmQ3YjhjYTZhYzk2YTc1NTA1MjgiLCJpYXQiOjE3ODExNDkwODYsImV4cCI6MTc4MTE1NjI4Nn0.iWaQNxYGYSu22J5iNFa_OQdTvVvTzEX3JJURNSmz98c
+
+### 1. Get all products
+GET {{baseUrl}}/api/products/
+Accept: application/json
+
+### 2. Get all brands
+GET {{baseUrl}}/api/products/brand
+Accept: application/json
+
+### 3. Get products by brand name
+GET {{baseUrl}}/api/products/brand/{{brandName}}
+Accept: application/json
+
+### 4. Get products by category
+GET {{baseUrl}}/api/products/category/{{categoryName}}
+Accept: application/json
+
+### 5. Get product by ID
+GET {{baseUrl}}/api/products/{{productId}}
+Accept: application/json
+
+### 6. Create a new product (Admin only)
+POST {{baseUrl}}/api/products/admin/createProduct
+Cookie: accessToken={{jwtToken}}; token={{jwtToken}}
+Content-Type: application/json
+
+{
+  "modelName": "Air Max 270",
+  "description": "Comfortable lifestyle shoe",
+  "brandId": "662b8f1e3c5a4b1a2c9d8e7f",
+  "gender": "unisex",
+  "category": "Running",
+  "rentalPlan": {
+    "3days": 15,
+    "7days": 25,
+    "14days": 40
+  },
+  "variants": [
+    {
+      "size": 9,
+      "color": "Black",
+      "stock": 10,
+      "price": 150
+    }
+  ]
+}
+
+### 7. Create a new brand (Admin only)
+POST {{baseUrl}}/api/products/admin/newBrand
+Cookie: accessToken={{jwtToken}}; token={{jwtToken}}
+Content-Type: application/json
+
+{
+  "brandName": "Nike"
+}
+
+### 8. Delete a product (Admin only)
+DELETE {{baseUrl}}/api/products/admin/{{productId}}
+Cookie: accessToken={{jwtToken}}; token={{jwtToken}}
+Accept: application/json
