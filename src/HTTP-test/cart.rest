@@ -1,0 +1,48 @@
+@baseUrl = http://localhost:5000
+@userId = 6a2a3326c84e9ccea31702f5
+@productId = 6a27c0ed8c4eca5fe8cf1730
+@skuColorCode = JTKJZF
+@itemId = 6a2a7515494726893cbc5cfa
+@jwtToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJhMzMyNmM4NGU5Y2NlYTMxNzAyZjUiLCJpYXQiOjE3ODExNjcwMzMsImV4cCI6MTc4MTE3NDIzM30.aVEm834JLpsSLnF5INETsm9ms7X5eQn2niRiDN7rqZA
+
+### 1. Add item to cart
+POST {{baseUrl}}/api/cart/addItem/{{userId}}
+Cookie: accessToken={{jwtToken}}
+Content-Type: application/json
+
+{
+  "item": "{{productId}}",
+  "skuColorCode": "{{skuColorCode}}",
+  "size": 43,
+  "quantity": 1
+}
+
+### 2. Get cart by user ID
+GET {{baseUrl}}/api/cart/{{userId}}
+Cookie: accessToken={{jwtToken}}
+Accept: application/json
+
+### 3. Update item quantity (replace :itemId with actual _id from GET response)
+PATCH {{baseUrl}}/api/cart/{{userId}}/{{itemId}}
+Cookie: accessToken={{jwtToken}}
+Content-Type: application/json
+
+{
+  "quantity": 3
+}
+
+### 4. Delete specific cart item (replace :itemId with actual _id from GET response)
+DELETE {{baseUrl}}/api/cart/{{userId}}/{{itemId}}
+Cookie: accessToken={{jwtToken}}
+Accept: application/json
+
+### 5. Remove product from cart by product + sku + size
+DELETE {{baseUrl}}/api/cart/removeItem/{{userId}}
+Cookie: accessToken={{jwtToken}}
+Content-Type: application/json
+
+{
+  "item": "{{productId}}",
+  "skuColorCode": "{{skuColorCode}}",
+  "size": 43
+}

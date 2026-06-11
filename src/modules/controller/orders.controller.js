@@ -10,9 +10,12 @@ export const createOrder = async (req, res, next) => {
   if (!items || items.length === 0) {
     return res.status(400).json({ success: false, message: "No items in order" });
   }
-  if (!rentalDays || rentalDays < 1) {
+
+  const days = Number(rentalDays || items?.[0]?.rentalDays);
+  if (!days || days < 1 || !Number.isInteger(days)) {
     return res.status(400).json({ success: false, message: "Invalid rental days" });
   }
+
   if (!grandTotal || grandTotal <= 0) {
     return res.status(400).json({ success: false, message: "Invalid grand total" });
   }
@@ -23,7 +26,7 @@ export const createOrder = async (req, res, next) => {
   try {
     const startDate = new Date();
     const endDate = new Date();
-    endDate.setDate(endDate.getDate() + rentalDays);
+    endDate.setDate(endDate.getDate() + days);
 
     const [order] = await Order.create([{
       userId: req.user._id,
@@ -34,8 +37,8 @@ export const createOrder = async (req, res, next) => {
         price: item.price,
         size: item.size,
         quantity: item.quantity,
-        rentalDays,
-        rentalFee: item.price * rentalDays * item.quantity,
+        rentalDays: days,
+        rentalFee: item.price * days * item.quantity,
         deposit: item.deposit,
       })),
       totalRental,

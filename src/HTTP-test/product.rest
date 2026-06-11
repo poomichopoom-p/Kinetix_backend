@@ -2,8 +2,7 @@
 @productId = 662b8f1e3c5a4b1a2c9d8e7f
 @brandName = Nike
 @categoryName = Running
-@jwtToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJhMmQ3YjhjYTZhYzk2YTc1NTA1MjgiLCJpYXQiOjE3ODExNDkwODYsImV4cCI6MTc4MTE1NjI4Nn0.iWaQNxYGYSu22J5iNFa_OQdTvVvTzEX3JJURNSmz98c
-
+@jwtToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJhMmQ3YjhjYTZhYzk2YTc1NTA1MjgiLCJpYXQiOjE3ODExNjY3ODAsImV4cCI6MTc4MTE3Mzk4MH0.tApiZDLcYyf6Qtv09_Z5HigEObSNFxSRCWulzBwu7Uw
 ### 1. Get all products
 GET {{baseUrl}}/api/products/
 Accept: application/json
