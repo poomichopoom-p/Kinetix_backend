@@ -32,10 +32,10 @@ const variantSchema = new mongoose.Schema(
       required: true,
     },
 
-    images: {
+    images: [{
       type: String,
       default: "",
-    },
+    }],
 
     size: [sizeSchema],
   },

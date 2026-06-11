@@ -95,7 +95,7 @@ export const login = async (req, res, next) => {
 };
 
 export const registerUser = async (req, res, next) => {
-  const { name, surname, email, password, address } = req.body || {};
+  const { name, surname, email, password, address,role } = req.body || {};
   const trimName = String(name || "").trim();
   const trimSurname = String(surname || "").trim();
   const trimEmail = String(email || "")
@@ -120,6 +120,7 @@ export const registerUser = async (req, res, next) => {
       surname: trimSurname,
       email: trimEmail,
       password,
+      role,
       ...(address ? { address } : {}),
     });
 

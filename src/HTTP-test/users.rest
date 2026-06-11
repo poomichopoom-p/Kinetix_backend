@@ -7,11 +7,12 @@ POST {{baseUrl}}/api/users/register
 Content-Type: application/json
 
 {
-  "name": "Test",
-  "surname": "User",
-  "email": "testuser@example.com",
+  "name": "tae",
+  "surname": "tae",
+  "email": "tae2@example.com",
   "password": "Password123",
-  "address": "123 Test St"
+  "address": "123 Test St",
+  "role": "admin"
 }
 
 ### Login as existing user

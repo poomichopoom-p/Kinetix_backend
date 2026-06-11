@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
-import { Brand } from "../Model/Brand.model.js"
+import { Brand } from "../Model/Brand.model.js";
 import { Products } from "../Model/products-model.js";
 
 export const getProduct = async (req, res, next) => {
   try {
-    const doc = await Products.find();
+    const doc = await Products.find().select("+images");
+    console.log(doc);
     if (!doc) {
       return res.status(500).json({
         success: false,
