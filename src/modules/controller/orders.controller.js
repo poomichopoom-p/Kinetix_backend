@@ -1,24 +1,31 @@
+import mongoose from "mongoose";
 import { Order } from "../Model/Orders-model.js";
 import { User } from "../Model/user-model.js";
 import { Products } from "../Model/products-model.js";
 import { Cart } from "../Model/Cart.model.js";
 
-// POST /api/orders
-
 export const createOrder = async (req, res, next) => {
+  const { items, rentalDays, totalRental, totalDeposit, grandTotal, shippingAddress } = req.body;
+
+  if (!items || items.length === 0) {
+    return res.status(400).json({ success: false, message: "No items in order" });
+  }
+  if (!rentalDays || rentalDays < 1) {
+    return res.status(400).json({ success: false, message: "Invalid rental days" });
+  }
+  if (!grandTotal || grandTotal <= 0) {
+    return res.status(400).json({ success: false, message: "Invalid grand total" });
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    const { items, rentalDays, totalRental, totalDeposit, grandTotal, shippingAddress } = req.body;
-
-    if (!items || items.length === 0) {
-      return res.status(400).json({ success: false, message: "No items in order" });
-    }
-
-    // Calculate rental period
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + rentalDays);
 
-    const order = await Order.create({
+    const [order] = await Order.create([{
       userId: req.user._id,
       items: items.map(item => ({
         productId: item.productId,
@@ -27,7 +34,7 @@ export const createOrder = async (req, res, next) => {
         price: item.price,
         size: item.size,
         quantity: item.quantity,
-        rentalDays: rentalDays,
+        rentalDays,
         rentalFee: item.price * rentalDays * item.quantity,
         deposit: item.deposit,
       })),
@@ -37,56 +44,77 @@ export const createOrder = async (req, res, next) => {
       status: "pending",
       startDate,
       endDate,
-      shippingAddress
-    });
+      shippingAddress: {
+        recipientName: shippingAddress?.recipientName || req.user?.name,
+        phone: shippingAddress?.phone,
+        addressLine1: shippingAddress?.addressLine1 || shippingAddress?.street,
+        city: shippingAddress?.city,
+        province: shippingAddress?.province || shippingAddress?.state,
+        postalCode: shippingAddress?.postalCode || shippingAddress?.zip,
+        country: shippingAddress?.country || "Thailand",
+      },
+    }], { session });
 
-    // Update user's dashboard summary
     await User.findByIdAndUpdate(req.user._id, {
       $inc: {
         "dashboardSummary.totalRentalsCount": 1,
         "dashboardSummary.totalSpent": grandTotal,
-        memberPoints: Math.floor(grandTotal / 100)
-      }
-    });
+        memberPoints: Math.floor(grandTotal / 100),
+      },
+    }, { session });
 
-    // Reduce product stock
     for (const item of items) {
-      await Products.findOneAndUpdate(
-        {
-          _id: item.productId,
-          "variants.size.size": item.size
-        },
-        {
-          $inc: { "variants.$[].size.$[size].stock": -item.quantity }
-        },
-        {
-          arrayFilters: [{ "size.size": item.size }]
+      const product = await Products.findOne({ _id: item.productId }).session(session);
+      if (!product) {
+        throw new Error(`Product not found: ${item.productId}`);
+      }
+
+      let stockUpdated = false;
+      for (const variant of product.variants) {
+        const sizeEntry = variant.size.find(s => String(s.size) === String(item.size));
+        if (sizeEntry) {
+          if (sizeEntry.stock < item.quantity) {
+            throw new Error(`Insufficient stock for ${product.modelName} size ${item.size}`);
+          }
+          sizeEntry.stock -= item.quantity;
+          stockUpdated = true;
+          break;
         }
-      );
+      }
+
+      if (!stockUpdated) {
+        throw new Error(`Size ${item.size} not found for product ${product.modelName}`);
+      }
+
+      await product.save({ validateBeforeSave: false, session });
     }
+
+    await session.commitTransaction();
 
     res.status(201).json({
       success: true,
       message: "Order created successfully",
-      data: { orderId: order._id, grandTotal: order.grandTotal }
+      data: { orderId: order._id, grandTotal: order.grandTotal },
     });
   } catch (err) {
+    await session.abortTransaction();
     console.error("Create order error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Cannot place order" });
+    return res.status(500).json({
+      success: false,
+      message: err.message || "Cannot place order",
+    });
+  } finally {
+    session.endSession();
   }
 };
 
-// GET /api/orders — get all orders for current user
-export const getUserOrders = async (req, res) => {
+export const getUserOrders = async (req, res, next) => {
   try {
     const orders = await Order.find({ userId: req.user._id }).sort({
       createdAt: -1,
     });
     return res.status(200).json({ success: true, data: orders });
   } catch (err) {
-    next(err);
     console.error("Get orders error:", err);
     return res
       .status(500)
@@ -117,10 +145,71 @@ export const getOrderById = async (req, res) => {
   }
 };
 
-// Get user's own orders (for user dashboard)
-export const getUserOrders = async (req, res) => {
-  const orders = await Order.find({ userId: req.user._id });
-  res.json({ success: true, data: orders });
+export const getActiveRentals = async (req, res, next) => {
+  try {
+    const activeOrders = await Orders.find({
+      customerId: req.user._id,
+      is_active: true,
+      status: { $nin: ["Done", "Fail"] },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Get active rentals successful",
+      data: activeOrders,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getPrebooking = async (req, res, next) => {
+  try {
+    const prebookings = await Orders.find({
+      customerId: req.user._id,
+      is_active: true,
+      status: "Waiting",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Get prebooking rentals successful",
+      data: prebookings,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getRentalTracking = async (req, res, next) => {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid rental ID" });
+  }
+
+  try {
+    const order = await Orders.findOne({
+      _id: id,
+      customerId: req.user._id,
+    });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Rental not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        shippingStatus: order.shippingStatus,
+        trackingNumber: order.trackingNumber,
+        estimatedDelivery: order.estimatedDelivery,
+        status: order.status,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
 };
 
 /*export const getUserOrders = async (req, res, next) => {
@@ -135,25 +224,6 @@ export const getUserOrders = async (req, res) => {
 };
 */
 
-
-
-// Get single order by ID
-export const getOrderById = async (req, res, next) => {
-  try {
-    const order = await Order.findOne({
-      _id: req.params.orderId,
-      userId: req.user._id
-    });
-
-    if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
-    }
-
-    res.json({ success: true, data: order });
-  } catch (err) {
-    next(err);
-  }
-};
 
 // ADMIN: Update order status (mark as shipped, active, returned)
 export const updateOrderStatus = async (req, res, next) => {

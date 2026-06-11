@@ -22,9 +22,9 @@ orderRouter.get("/", authUser, getUserOrders);
 orderRouter.get("/:orderId", authUser, getOrderById);
 
 // 2. Transaction Processing Payment Mock Gateway
-orderRouter.post("/:orderId/pay", mockPayment);
+orderRouter.post("/:orderId/pay", authUser, mockPayment);
 
 // 3. Administrative Order Lifecycle Management
-orderRouter.put("/:orderId/status", isAdmin, updateOrderStatus);
+orderRouter.put("/:orderId/status", authUser, isAdmin, updateOrderStatus);
 //orderRouter.post("/:orderId/pay", mockPayment);
 

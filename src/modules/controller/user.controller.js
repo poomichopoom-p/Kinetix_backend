@@ -199,9 +199,9 @@ export const getUserStats = async (req, res, next) => {
       totalRentals === 0
         ? 100
         : Math.max(
-          0,
-          Math.round(((totalRentals - returned) / totalRentals) * 100),
-        );
+            0,
+            Math.round(((totalRentals - returned) / totalRentals) * 100),
+          );
 
     return res.status(200).json({
       success: true,
@@ -288,7 +288,7 @@ export const updateUserProfile = async (req, res, next) => {
         updates[field] = req.body[field];
       }
     }
-    console.log(updates)
+    console.log(updates);
 
     if (updates.email) {
       updates.email = String(updates.email).trim().toLowerCase();
@@ -347,12 +347,8 @@ export const getUserById = async (req, res, next) => {
       });
     }
 
-<<<<<<< HEAD
-    const user = await User.findById(req.params.id);
-=======
     const userId = getRequestUserId(req);
     const user = await applySelect(User.findById(userId), "-password");
->>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -390,11 +386,6 @@ export const updateUserById = async (req, res, next) => {
       "phone",
       "avatarUrl",
     ];
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 1a91f3a1719f142fe56c895ac92eb143bd0e890a
     const updates = {};
 
     for (const field of allowedFields) {
@@ -476,9 +467,7 @@ export const deleteUserById = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-
 };
-
 
 export const logout = async (req, res, next) => {
   try {
@@ -509,7 +498,6 @@ export const logout = async (req, res, next) => {
   }
 };
 
-
 export const usersLogout = async (req, res) => {
   const isProd = process.env.NODE_ENV === "production";
 
@@ -525,4 +513,3 @@ export const usersLogout = async (req, res) => {
     message: "Logout success !",
   });
 };
-
