@@ -14,8 +14,12 @@ import { router as cartRouter } from "./cart.router/cart-router.js";
 import authUser from "../middleware/authUser.js";
 import isAdmin from "../middleware/isAdmin.js";
 import { adminRouter } from "./admin.router/admin.router.js";
-import { getUserRewards, redeemPoints } from "../modules/controller/user.controller.js";
-
+import {
+  getUserRewards,
+  redeemPoints,
+} from "../modules/controller/user.controller.js";
+import { router as notificationRouter } from "./notification.router/notification.router.js";
+import { router as wishlistRouter } from "./wishlist.routes/wishlist.router.js"
 
 export const router = Router();
 
@@ -30,6 +34,8 @@ router.use("/brands", brandRouter); // New route for brands
 router.use("/categories", categoryRouter); // New route for categories
 router.use("/cart", authUser, cartRouter);
 router.use("/admin", adminRouter);
+router.use("/notifications", authUser, notificationRouter);
+router.use("/wishlist", authUser, wishlistRouter);
 
 // ── Delivery & Return Management ───────────────────────────────────────────────
 //router.use("/delivery-auth", deliveryAuthRouter);
