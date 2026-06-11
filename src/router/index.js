@@ -19,7 +19,7 @@ import {
   redeemPoints,
 } from "../modules/controller/user.controller.js";
 import { router as notificationRouter } from "./notification.router/notification.router.js";
-import { router as wishlistRouter } from "./wishlist.routes/wishlist.router.js"
+import { router as wishlistRouter } from "./wishlist.routes/wishlist.router.js";
 
 export const router = Router();
 
@@ -40,3 +40,6 @@ router.use("/wishlist", authUser, wishlistRouter);
 // ── Delivery & Return Management ───────────────────────────────────────────────
 //router.use("/delivery-auth", deliveryAuthRouter);
 //router.use("/jobs", jobRouter);
+
+router.get("/rewards/points", authUser, getUserRewards);
+router.post("/rewards/redeem", authUser, redeemPoints);
