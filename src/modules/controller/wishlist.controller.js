@@ -1,4 +1,4 @@
-import { User } from "../Model/users-model.js";
+import { User } from "../Model/user-model.js";
 
 export const getWishlist = async (req, res, next) => {
   try {
