@@ -1,0 +1,49 @@
+@baseUrl = http://localhost:5000
+@userId = 6a2a2d7b8ca6ac96a7550528
+@jwtToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJhMmQ3YjhjYTZhYzk2YTc1NTA1MjgiLCJpYXQiOjE3ODExNDkwODYsImV4cCI6MTc4MTE1NjI4Nn0.iWaQNxYGYSu22J5iNFa_OQdTvVvTzEX3JJURNSmz98c
+
+### Register a new user
+POST {{baseUrl}}/api/users/register
+Content-Type: application/json
+
+{
+  "name": "Test",
+  "surname": "User",
+  "email": "testuser@example.com",
+  "password": "Password123",
+  "address": "123 Test St"
+}
+
+### Login as existing user
+POST {{baseUrl}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "Password123"
+}
+
+### Logout current user
+POST {{baseUrl}}/api/users/logout
+Cookie: access_token={{jwtToken}}; token={{jwtToken}}
+Accept: application/json
+
+### Get user by ID
+GET {{baseUrl}}/api/users/{{userId}}
+Authorization: Bearer {{jwtToken}}
+Accept: application/json
+
+### Update user by ID
+PATCH {{baseUrl}}/api/users/{{userId}}
+Authorization: Bearer {{jwtToken}}
+Content-Type: application/json
+
+{
+  "address": "Updated Address 456",
+  "phone": "0123456789"
+}
+
+### Delete user by ID
+DELETE {{baseUrl}}/api/users/{{userId}}
+Authorization: Bearer {{jwtToken}}
+Accept: application/json

@@ -1,0 +1,85 @@
+@baseUrl = http://localhost:5000
+@orderId = 6a2a797eda023ebb0f9f5425
+@jwtToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJhMzMyNmM4NGU5Y2NlYTMxNzAyZjUiLCJpYXQiOjE3ODExNjg1MDMsImV4cCI6MTc4MTE3NTcwM30.iv5Q5030YqMYYznqTYYEzx-qY_z3sUlUWvBAlLd_t00
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJhMzNlZTI2ZGZhN2Y1Y2QyMWVjNzkiLCJpYXQiOjE3ODExNjg1MTYsImV4cCI6MTc4MTE3NTcxNn0.O70shaRI6-sFCRY5p2fATcIJ_Fd0NtudsvDEYd6NxfA
+
+### 1. Test route
+GET {{baseUrl}}/api/orders/test
+Accept: application/json
+
+### 2. Create a new order
+POST {{baseUrl}}/api/orders/
+Cookie: accessToken={{jwtToken}}
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "productId": "6a27c0ed8c4eca5fe8cf1730",
+      "name": "Gel-Kayano 36",
+      "price": 150,
+      "size": 43,
+      "quantity": 1,
+      "deposit": 300,
+      "image": ""
+    }
+  ],
+  "rentalDays": 1,
+  "totalRental": 150,
+  "totalDeposit": 300,
+  "grandTotal": 450,
+  "shippingAddress": {
+    "recipientName": "Test User",
+    "phone": "0812345678",
+    "addressLine1": "123 Test St",
+    "city": "Bangkok",
+    "province": "Bangkok",
+    "postalCode": "10100",
+    "country": "Thailand"
+  }
+}
+
+### 3. Get all orders for current user
+GET {{baseUrl}}/api/orders/
+Cookie: accessToken={{jwtToken}}
+Accept: application/json
+
+### 4. Get single order by ID
+GET {{baseUrl}}/api/orders/{{orderId}}
+Cookie: accessToken={{jwtToken}}
+Accept: application/json
+
+### Expected response for get order by ID
+# {
+#   "success": true,
+#   "data": {
+#     "_id": "...",
+#     "userId": "...",
+#     "items": [...],
+#     "grandTotal": ...,
+#     "status": "pending",
+#     ...
+#   }
+# }
+
+### 5. Mock payment for an order
+POST {{baseUrl}}/api/orders/{{orderId}}/pay
+Cookie: accessToken={{jwtToken}}
+Content-Type: application/json
+
+{
+  "paymentMethod": "credit_card",
+  "cardNumber": "4111111111111111",
+  "expiry": "12/28",
+  "cvv": "123"
+}
+
+### 6. Update order status (Admin only)
+PUT {{baseUrl}}/api/orders/{{orderId}}/status
+Cookie: accessToken={{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "shipped",
+  "trackingNumber": "TH123456789"
+}

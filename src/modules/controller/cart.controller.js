@@ -1,100 +1,32 @@
-import { Cart } from "../Model/Cart.model.js";
 import { User } from "../Model/user-model.js";
 
-// GET /api/cart/:_id
-export const getCart = async (req, res) => {
+export const addToCart = async (req, res, next) => {
   try {
-    const cart = await User.findOne({ userId: req.params._id });
-    return res.status(200).json({ success: true, data: cart?.items || [] });
-  } catch (err) {
-    console.error("Get cart error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Cannot load cart" });
-  }
-};
+    const { item, skuColorCode, size, quantity } = req.body;
 
-export const addItem = async (req, res, next) => {
-  const { item, skuColorCode, size, quantity } = req.body || {};
-  const { userId } = req.params;
-  if (!item || !skuColorCode || !size || !quantity) {
-    return res.status(400).json({
-      success: false,
-      message: "Incomplete information provided.",
-    });
-  }
-};
-// POST /api/cart/addItem/:_id
-export const addToCart = async (req, res) => {
-  try {
-    const { item, name, image, price, skuColorCode, size, quantity } = req.body;
-
-    let cart = await Cart.findOne({ userId: req.params._id });
-    if (!cart) cart = new Cart({ userId: req.params._id, items: [] });
-    const existing = cart.items.find(
-      (i) =>
-        i.item.toString() === item &&
-        i.skuColorCode === skuColorCode &&
-        i.size === size,
-    );
-
-    if (existing) {
-      existing.quantity += quantity || 1;
-    } else {
-      cart.items.push({
-        item,
-        name,
-        image,
-        price,
-        skuColorCode,
-        size,
-        quantity: quantity || 1,
-      });
-    }
-
-    cart.updatedAt = new Date();
-    await cart.save();
-
-    if (!selectedSize) {
-      return res.status(404).json({
-        success: false,
-        message: "Size not found",
-      });
-    }
-
-    if (selectedSize.stock < quan) {
+    if (!item || !skuColorCode || !size || !quantity) {
       return res.status(400).json({
         success: false,
-        message: "Insufficient stock available",
+        message: "Incomplete information provided.",
       });
     }
 
-    // Check if item already exists in user's cart
-    const user = await User.findById(userId);
+    const user = await User.findById(req.params.userId);
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    const existingItemIndex = user.cart.findIndex(
+    const existing = user.cart.find(
       (c) =>
         c.item.toString() === item &&
         c.skuColorCode === skuColorCode &&
         c.size === size,
     );
 
-    if (existingItemIndex > -1) {
-      // Update quantity if it exists
-      user.cart[existingItemIndex].quantity += quan;
+    if (existing) {
+      existing.quantity += quantity;
     } else {
-      // Add new item if it doesn't
-      user.cart.push({
-        item,
-        skuColorCode,
-        size,
-        quantity: quan,
-      });
+      user.cart.push({ item, skuColorCode, size, quantity });
     }
 
     await user.save();
@@ -151,7 +83,7 @@ export const getAdditem = async (req, res, next) => {
   const { _id } = req.params || {};
   console.log(_id);
   try {
-    const user = await User.findById({ _id })
+    const user = await User.findById(_id)
       .populate("cart.item")
       .select("+cart");
     if (!user) {

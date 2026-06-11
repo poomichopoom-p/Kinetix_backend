@@ -1,10 +1,9 @@
 node_modules/
 
-Test-HTTP/
+
 src/testHTTP
 .env
 .Ds_store
 .codex/
 backend-5000.log
 live-api-server.*
-HTTP-test/
