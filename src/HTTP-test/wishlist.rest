@@ -1,0 +1,18 @@
+@baseUrl = http://localhost:5000
+@productId = 6a27c0ed8c4eca5fe8cf1730
+@jwtToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2YTJhMzMyNmM4NGU5Y2NlYTMxNzAyZjUiLCJpYXQiOjE3ODExOTczNzYsImV4cCI6MTc4MTIwNDU3Nn0.EuVfczGgLhE1MG-QVUrqiGVz1IlFN7lpRbwYMSLxjt8
+
+### 1. Get wishlist
+GET {{baseUrl}}/api/wishlist/
+Cookie: accessToken={{jwtToken}}
+Accept: application/json
+
+### 2. Add product to wishlist
+POST {{baseUrl}}/api/wishlist/{{productId}}
+Cookie: accessToken={{jwtToken}}
+Accept: application/json
+
+### 3. Remove product from wishlist
+DELETE {{baseUrl}}/api/wishlist/{{productId}}
+Cookie: accessToken={{jwtToken}}
+Accept: application/json

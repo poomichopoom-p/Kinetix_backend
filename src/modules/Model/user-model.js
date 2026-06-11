@@ -49,6 +49,7 @@ const userSchema = new mongoose.Schema(
       enum: ["bronze", "gold", "silver", "platinum", "Diamond"],
       default: "bronze",
     },
+    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
   },
   { timestamps: true },
 );
